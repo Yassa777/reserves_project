@@ -1,0 +1,12 @@
+variable,arch_lm_stat,arch_lm_pvalue,has_arch_effects
+gross_reserves_usd_m,48.7599,0.0,True
+net_usable_reserves_usd_m,36.6287,0.0003,True
+exports_usd_m,77.4298,0.0,True
+imports_usd_m,18.548,0.1,False
+remittances_usd_m,21.9541,0.038,True
+tourism_usd_m,40.9104,0.0001,True
+cse_net_usd_m,17.4137,0.1347,False
+usd_lkr,13.1296,0.3597,False
+m2_usd_m,0.259,1.0,False
+trade_balance_usd_m,13.8178,0.3125,False
+reserve_change_usd_m,60.4677,0.0,True
