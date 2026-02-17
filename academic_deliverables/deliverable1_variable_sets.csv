@@ -1,0 +1,6 @@
+variable_set,variables,n_variables,n_observations,train_obs,valid_obs,test_obs,date_start,date_end,johansen_n_coint
+parsimonious,"gross_reserves_usd_m, trade_balance_usd_m, usd_lkr",3,219,156,36,27,2007-01,2025-03,1
+bop,"gross_reserves_usd_m, exports_usd_m, imports_usd_m, remittances_usd_m, tourism_usd_m",5,195,132,36,27,2009-01,2025-03,2
+monetary,"gross_reserves_usd_m, usd_lkr, m2_usd_m",3,221,180,27,14,2005-01,2025-02,1
+pca,"gross_reserves_usd_m, PC1, PC2, PC3",4,130,95,24,11,2012-01,2024-11,1
+full,"gross_reserves_usd_m, exports_usd_m, imports_usd_m, remittances_usd_m, usd_lkr, m2_usd_m, trade_balance_usd_m",7,137,96,27,14,2012-01,2025-02,0
