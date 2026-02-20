@@ -98,9 +98,14 @@ class LaTeXTableGenerator:
         latex.append(f'\\{self.font_size}')
         latex.append(r'\caption{Out-of-Sample Forecast Accuracy}')
         latex.append(r'\label{tab:accuracy}')
-        latex.append(r'\begin{tabular}{lccccc}')
+        include_policy = 'Policy_Loss' in mcs_summary.columns
+        tabular_cols = 'lcccccc' if include_policy else 'lccccc'
+        latex.append(rf'\begin{{tabular}}{{{tabular_cols}}}')
         latex.append(r'\toprule')
-        latex.append(r'Model & RMSE & MAE & MAPE (\%) & MCS & Rank \\')
+        if include_policy:
+            latex.append(r'Model & RMSE & MAE & MAPE (\%) & Policy Loss & MCS & Rank \\')
+        else:
+            latex.append(r'Model & RMSE & MAE & MAPE (\%) & MCS & Rank \\')
         latex.append(r'\midrule')
 
         # Sort by rank
@@ -113,6 +118,7 @@ class LaTeXTableGenerator:
         best_rmse = df['RMSE'].min()
         best_mae = df['MAE'].min()
         best_mape = df['MAPE'].min() if 'MAPE' in df.columns else np.nan
+        best_policy = df['Policy_Loss'].min() if include_policy else np.nan
 
         for _, row in df.iterrows():
             model = row['Model']
@@ -135,6 +141,14 @@ class LaTeXTableGenerator:
             else:
                 mape_str = '--'
 
+            if include_policy and 'Policy_Loss' in row and not pd.isna(row.get('Policy_Loss')):
+                policy_str = self.format_number(
+                    row['Policy_Loss'], decimals=1,
+                    bold=(row['Policy_Loss'] == best_policy)
+                )
+            else:
+                policy_str = '--'
+
             # MCS indicator
             if 'In_MCS' in row:
                 mcs_str = r'$\checkmark$' if row['In_MCS'] else ''
@@ -144,14 +158,25 @@ class LaTeXTableGenerator:
             # Rank
             rank_str = str(int(row['Rank'])) if 'Rank' in row else '--'
 
-            latex.append(f'{model} & {rmse_str} & {mae_str} & {mape_str} & {mcs_str} & {rank_str} \\\\')
+            if include_policy:
+                latex.append(
+                    f'{model} & {rmse_str} & {mae_str} & {mape_str} & {policy_str} & {mcs_str} & {rank_str} \\\\'
+                )
+            else:
+                latex.append(f'{model} & {rmse_str} & {mae_str} & {mape_str} & {mcs_str} & {rank_str} \\\\')
 
         latex.append(r'\bottomrule')
         latex.append(r'\end{tabular}')
         latex.append(r'\begin{tablenotes}')
         latex.append(r'\small')
         latex.append(r'\item Notes: RMSE = Root Mean Squared Error; MAE = Mean Absolute Error; ')
-        latex.append(r'MAPE = Mean Absolute Percentage Error; MCS = 90\% Model Confidence Set membership. ')
+        if include_policy:
+            latex.append(
+                r'MAPE = Mean Absolute Percentage Error; Policy Loss = asymmetric loss penalizing reserve shortfalls; '
+            )
+        else:
+            latex.append(r'MAPE = Mean Absolute Percentage Error; ')
+        latex.append(r'MCS = 90\% Model Confidence Set membership. ')
         latex.append(r'Bold indicates best performance. Test period: 2023--2025.')
         latex.append(r'\end{tablenotes}')
         latex.append(r'\end{table}')

@@ -42,3 +42,22 @@ def naive_mae_scale(series: np.ndarray) -> float:
     diffs = np.abs(np.diff(series))
     scale = float(np.mean(diffs)) if len(diffs) else np.nan
     return scale
+
+
+def asymmetric_loss(
+    actual: np.ndarray,
+    forecast: np.ndarray,
+    under_weight: float = 2.0,
+    over_weight: float = 1.0,
+) -> float:
+    """Asymmetric loss: penalize under-forecasting more than over-forecasting."""
+    actual = np.asarray(actual)
+    forecast = np.asarray(forecast)
+    mask = ~np.isnan(actual) & ~np.isnan(forecast)
+    if mask.sum() == 0:
+        return np.nan
+    actual = actual[mask]
+    forecast = forecast[mask]
+    errors = forecast - actual
+    loss = np.where(errors < 0, under_weight * np.abs(errors), over_weight * np.abs(errors))
+    return float(np.mean(loss))

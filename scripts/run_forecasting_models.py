@@ -16,7 +16,8 @@ from forecasting_models.regime_var_model import run_regime_var_forecast
 from forecasting_models.ms_vecm_model import run_ms_vecm_forecast
 from forecasting_models.data_loader import (
     get_results_dir,
-    load_johansen_rank,
+    estimate_johansen_rank,
+    estimate_k_ar_diff,
     load_prep_csv,
     load_prep_metadata,
 )
@@ -49,7 +50,9 @@ def run_forecasts(varset: str | None = None, verbose: bool = True):
             print(f"Varset: {varset}")
 
     meta = load_prep_metadata(varset)
-    joh_rank = load_johansen_rank()
+    train_end = pd.Timestamp(meta["splits"]["train_end"])
+    k_ar_diff = estimate_k_ar_diff(vecm_levels, train_end=train_end)
+    joh_rank = estimate_johansen_rank(vecm_levels, train_end=train_end, k_ar_diff=k_ar_diff)
 
     arima_df = load_prep_csv("arima_prep_dataset.csv", varset)
     vecm_levels = load_prep_csv("vecm_levels_dataset.csv", varset)
@@ -62,7 +65,7 @@ def run_forecasts(varset: str | None = None, verbose: bool = True):
     # ARIMA
     arima_out, arima_summary = run_arima_forecast(arima_df, meta["arima"]["arima_exog_vars"])
     # VECM
-    vecm_out, vecm_summary = run_vecm_forecast(vecm_levels, joh_rank, meta["vecm"]["ect_metadata"].get("k_ar_diff", 2))
+    vecm_out, vecm_summary = run_vecm_forecast(vecm_levels, joh_rank, k_ar_diff)
     # MS-VAR / MS-VECM level reference from full target series
     level_series = arima_df.set_index("date")["gross_reserves_usd_m"]
     reg_var_out, reg_var_summary = run_regime_var_forecast(ms_var_raw, ms_var_scaled, level_series)

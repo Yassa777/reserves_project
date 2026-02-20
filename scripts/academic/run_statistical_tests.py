@@ -83,6 +83,7 @@ FORECAST_HORIZON = 1  # For HAC standard errors
 BASE_DATA_DIR = PROJECT_ROOT / "data"
 BASELINE_RESULTS_DIR = BASE_DATA_DIR / "forecast_results"
 ACADEMIC_RESULTS_DIR = BASE_DATA_DIR / "forecast_results_academic"
+UNIFIED_RESULTS_DIR = BASE_DATA_DIR / "forecast_results_unified"
 OUTPUT_DIR = BASE_DATA_DIR / "statistical_tests"
 FIGURES_DIR = OUTPUT_DIR / "figures"
 
@@ -244,8 +245,92 @@ def load_combination_forecasts() -> dict:
     return forecasts
 
 
-def load_all_forecasts() -> tuple:
+def load_unified_forecasts(
+    varset: str = "parsimonious",
+    horizon: int = 1,
+    split: str = "test",
+    min_obs: int = 24,
+) -> tuple:
+    """Load forecasts from unified rolling-origin outputs."""
+    forecasts = {}
+    density_forecasts = {}
+    actuals = None
+
+    path = UNIFIED_RESULTS_DIR / f"rolling_origin_forecasts_{varset}.csv"
+    if not path.exists():
+        print(f"Unified forecasts not found: {path}")
+        return forecasts, actuals, density_forecasts
+
+    df = pd.read_csv(path, parse_dates=["forecast_date"])
+    df = df[(df["horizon"] == horizon) & (df["split"] == split)]
+    if df.empty:
+        print("Unified forecasts empty after filtering.")
+        return forecasts, actuals, density_forecasts
+
+    actual_series = df.groupby("forecast_date")["actual"].mean()
+    forecast_pivot = df.pivot_table(
+        index="forecast_date",
+        columns="model",
+        values="forecast",
+        aggfunc="mean",
+    )
+    std_pivot = df.pivot_table(
+        index="forecast_date",
+        columns="model",
+        values="std",
+        aggfunc="mean",
+    )
+
+    valid_models = [
+        m for m in forecast_pivot.columns
+        if forecast_pivot[m].notna().sum() >= min_obs
+    ]
+    if not valid_models:
+        print("No unified models with sufficient observations.")
+        return forecasts, actuals, density_forecasts
+
+    aligned = pd.concat(
+        [actual_series.rename("actual"), forecast_pivot[valid_models]],
+        axis=1,
+    ).dropna()
+
+    if len(aligned) < min_obs:
+        print(f"Only {len(aligned)} aligned observations after filtering.")
+
+    actuals = aligned["actual"].values
+    forecasts = {m: aligned[m].values for m in valid_models}
+
+    if not std_pivot.empty:
+        std_aligned = std_pivot.reindex(aligned.index)
+        for m in valid_models:
+            if m not in std_aligned.columns:
+                continue
+            std_vals = std_aligned[m].values
+            if np.isfinite(std_vals).sum() >= min_obs:
+                density_forecasts[m] = (aligned[m].values, std_vals)
+
+    print(f"Loaded unified forecasts: {varset}, h={horizon}, split={split}")
+    print(f"Models included: {list(forecasts.keys())}")
+    print(f"Aligned observations: {len(actuals)}")
+    return forecasts, actuals, density_forecasts
+
+
+def load_all_forecasts(
+    use_unified: bool = False,
+    unified_varset: str = "parsimonious",
+    unified_horizon: int = 1,
+    unified_split: str = "test",
+    min_obs: int = 24,
+) -> tuple:
     """Load all available forecasts and align them."""
+    if use_unified:
+        return load_unified_forecasts(
+            varset=unified_varset,
+            horizon=unified_horizon,
+            split=unified_split,
+            min_obs=min_obs,
+        )
+
     print("\n" + "="*60)
     print("Loading All Available Forecasts")
     print("="*60)
@@ -584,6 +669,30 @@ def plot_forecast_comparison(forecasts: dict, actuals: np.ndarray, save_path: Pa
 
 def main():
     """Main execution function."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run statistical tests for forecast evaluation")
+    parser.add_argument("--use-unified", action="store_true", help="Use unified rolling-origin outputs")
+    parser.add_argument("--unified-varset", default="parsimonious")
+    parser.add_argument("--unified-horizon", type=int, default=1)
+    parser.add_argument("--unified-split", default="test")
+    parser.add_argument("--min-obs", type=int, default=24)
+    parser.add_argument("--output-dir", default=None)
+    args = parser.parse_args()
+
+    global OUTPUT_DIR, FIGURES_DIR, FORECAST_HORIZON
+    if args.use_unified:
+        FORECAST_HORIZON = args.unified_horizon
+
+    if args.output_dir:
+        OUTPUT_DIR = Path(args.output_dir)
+    elif args.use_unified:
+        OUTPUT_DIR = BASE_DATA_DIR / "statistical_tests_unified"
+
+    FIGURES_DIR = OUTPUT_DIR / "figures"
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+
     print("="*60)
     print("STATISTICAL TESTS FOR FORECAST EVALUATION")
     print("Specification 10 - Academic Forecasting Pipeline")
@@ -592,7 +701,13 @@ def main():
     print(f"Output directory: {OUTPUT_DIR}")
 
     # Load all forecasts
-    forecasts, actuals, density_forecasts = load_all_forecasts()
+    forecasts, actuals, density_forecasts = load_all_forecasts(
+        use_unified=args.use_unified,
+        unified_varset=args.unified_varset,
+        unified_horizon=args.unified_horizon,
+        unified_split=args.unified_split,
+        min_obs=args.min_obs,
+    )
 
     if actuals is None or len(forecasts) < 2:
         print("\nError: Insufficient data for statistical tests")

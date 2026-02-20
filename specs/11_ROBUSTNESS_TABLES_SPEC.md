@@ -21,6 +21,16 @@ Generate publication-ready output for academic paper:
 
 ---
 
+## Unified Evaluator Inputs (NEW)
+
+Use unified rolling-origin outputs (common forecast API) as the default input for Tables 1–3 and robustness checks:
+- `data/forecast_results_unified/rolling_origin_summary_<varset>.csv`
+- `data/forecast_results_unified/rolling_origin_forecasts_<varset>.csv`
+
+These summaries include point metrics plus probabilistic scores (CRPS, log score) and coverage rates for 80/95% intervals, enabling additional robustness tables if needed.
+
+---
+
 ## Main Tables
 
 ### Table 1: Forecast Accuracy Comparison (Point Forecasts)
@@ -639,4 +649,3 @@ def compile_paper_statistics():
 | Date | Version | Changes |
 |------|---------|---------|
 | 2026-02-10 | 1.0 | Initial specification |
-

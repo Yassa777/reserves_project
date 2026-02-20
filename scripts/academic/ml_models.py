@@ -35,6 +35,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_DIR = DATA_DIR / "model_verification"
+TUNING_DIR = DATA_DIR / "model_verification" / "ml_tuning"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Periods
@@ -72,13 +73,14 @@ def create_lag_features(df, target_col, lags=[1, 2, 3, 6, 12]):
                 features[f'{col}_lag{lag}'] = df[col].shift(lag)
 
     # Rolling statistics
-    features[f'{target_col}_ma3'] = df[target_col].rolling(3).mean()
-    features[f'{target_col}_ma6'] = df[target_col].rolling(6).mean()
-    features[f'{target_col}_std3'] = df[target_col].rolling(3).std()
+    # Shift by 1 to avoid look-ahead leakage (use only past info)
+    features[f'{target_col}_ma3'] = df[target_col].rolling(3).mean().shift(1)
+    features[f'{target_col}_ma6'] = df[target_col].rolling(6).mean().shift(1)
+    features[f'{target_col}_std3'] = df[target_col].rolling(3).std().shift(1)
 
     # Momentum features
-    features[f'{target_col}_mom1'] = df[target_col].diff(1)
-    features[f'{target_col}_mom3'] = df[target_col].diff(3)
+    features[f'{target_col}_mom1'] = df[target_col].diff(1).shift(1)
+    features[f'{target_col}_mom3'] = df[target_col].diff(3).shift(1)
 
     # Target (next month's value)
     features['target'] = df[target_col]
@@ -114,16 +116,28 @@ def train_xgboost(df, target_col='gross_reserves_usd_m'):
 
     print(f"\nTrain: {len(X_train)}, Valid: {len(X_valid)}, Test: {len(X_test)}")
 
-    # Train XGBoost
-    model = xgb.XGBRegressor(
-        n_estimators=100,
-        max_depth=4,
-        learning_rate=0.1,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        early_stopping_rounds=10,
-    )
+    # Train XGBoost (use tuned params if available)
+    params = {
+        "n_estimators": 100,
+        "max_depth": 4,
+        "learning_rate": 0.1,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "random_state": 42,
+        "early_stopping_rounds": 10,
+    }
+    tuning_path = TUNING_DIR / "xgb_best_params_parsimonious.json"
+    if tuning_path.exists():
+        try:
+            import json
+            with open(tuning_path, "r") as f:
+                tuned = json.load(f).get("best_params") or {}
+            params.update(tuned)
+            print(f"Using tuned XGBoost params from {tuning_path}")
+        except Exception:
+            pass
+
+    model = xgb.XGBRegressor(**params)
 
     model.fit(
         X_train, y_train,
@@ -202,12 +216,30 @@ def train_lstm(df, target_col='gross_reserves_usd_m'):
     # Columns to use
     feature_cols = [target_col] + [c for c in data.columns if c != target_col]
 
-    # Scale data
+    # Scale data (fit on training only to avoid leakage)
     scaler = MinMaxScaler()
-    scaled_data = scaler.fit_transform(data[feature_cols])
+    train_mask = data.index <= TRAIN_END
+    scaler.fit(data.loc[train_mask, feature_cols])
+    scaled_data = scaler.transform(data[feature_cols])
 
     # Create sequences - shorter sequence for better generalization
     seq_length = 6
+    units = 32
+    dropout = 0.3
+    learning_rate = 0.001
+    tuning_path = TUNING_DIR / "lstm_best_params_parsimonious.json"
+    if tuning_path.exists():
+        try:
+            import json
+            with open(tuning_path, "r") as f:
+                tuned = json.load(f).get("best_params") or {}
+            seq_length = tuned.get("seq_length", seq_length)
+            units = tuned.get("units", units)
+            dropout = tuned.get("dropout", dropout)
+            learning_rate = tuned.get("learning_rate", learning_rate)
+            print(f"Using tuned LSTM params from {tuning_path}")
+        except Exception:
+            pass
     X, y = create_sequences(scaled_data, seq_length)
 
     # Align indices
@@ -228,13 +260,14 @@ def train_lstm(df, target_col='gross_reserves_usd_m'):
 
     # Build simpler LSTM model (less prone to overfitting)
     model = Sequential([
-        LSTM(32, activation='tanh', input_shape=(seq_length, X.shape[2])),
-        Dropout(0.3),
-        Dense(16, activation='relu'),
+        LSTM(units, activation='tanh', input_shape=(seq_length, X.shape[2])),
+        Dropout(dropout),
+        Dense(max(8, units // 2), activation='relu'),
         Dense(1)
     ])
 
-    model.compile(optimizer='adam', loss='mse')
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    model.compile(optimizer=optimizer, loss='mse')
 
     # Train with early stopping
     early_stop = EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)

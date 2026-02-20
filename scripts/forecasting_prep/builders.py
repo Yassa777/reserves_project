@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from statsmodels.tsa.vector_ar.vecm import coint_johansen
+from statsmodels.tsa.api import VAR
 
 from .config import (
     DIAG_DIR,
@@ -111,14 +112,38 @@ def _parse_johansen_k_diff(summary: pd.DataFrame | None) -> int:
         return 2
 
 
-def _compute_ect(levels: pd.DataFrame, k_ar_diff: int) -> tuple[pd.Series | None, dict[str, Any]]:
-    if len(levels) < MIN_OBS_VECM:
-        return None, {"error": "Insufficient observations for Johansen vector"}
+def _select_k_ar_diff(levels: pd.DataFrame, max_lags: int = 6) -> int:
+    train_levels = levels.loc[levels.index <= TRAIN_END].dropna()
+    if len(train_levels) < max(30, max_lags + 1):
+        return 2
+    try:
+        sel = VAR(train_levels).select_order(maxlags=max_lags)
+        chosen = None
+        if hasattr(sel, "selected_orders") and sel.selected_orders:
+            chosen = sel.selected_orders.get("aic") or sel.selected_orders.get("bic")
+        if chosen is None and hasattr(sel, "aic"):
+            chosen = sel.aic
+        if chosen is None:
+            return 2
+        chosen = int(chosen)
+        return max(1, chosen - 1)
+    except Exception:
+        return 2
+
+
+def _compute_ect(
+    levels: pd.DataFrame,
+    k_ar_diff: int,
+    train_end: pd.Timestamp,
+) -> tuple[pd.Series | None, dict[str, Any]]:
+    train_levels = levels.loc[levels.index <= train_end]
+    if len(train_levels) < MIN_OBS_VECM:
+        return None, {"error": "Insufficient training observations for Johansen vector"}
 
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            joh = coint_johansen(levels, det_order=0, k_ar_diff=k_ar_diff)
+            joh = coint_johansen(train_levels, det_order=0, k_ar_diff=k_ar_diff)
 
         beta = np.asarray(joh.evec[:, 0], dtype=float)
         target_coeff = beta[0] if not np.isclose(beta[0], 0.0) else 1.0
@@ -130,10 +155,12 @@ def _compute_ect(levels: pd.DataFrame, k_ar_diff: int) -> tuple[pd.Series | None
             "k_ar_diff": int(k_ar_diff),
             "trace_stats": [float(v) for v in joh.lr1],
             "trace_cv_95": [float(v) for v in joh.cvt[:, 1]],
+            "train_end": str(train_end.date()),
+            "train_obs": int(len(train_levels)),
         }
         return ect, meta
     except Exception as exc:
-        return None, {"error": str(exc), "k_ar_diff": int(k_ar_diff)}
+        return None, {"error": str(exc), "k_ar_diff": int(k_ar_diff), "train_end": str(train_end.date())}
 
 
 def build_vecm_datasets(
@@ -150,8 +177,10 @@ def build_vecm_datasets(
     levels = add_split_labels(levels)
 
     joh_summary = load_johansen_summary()
-    k_ar_diff = _parse_johansen_k_diff(joh_summary)
-    ect, ect_meta = _compute_ect(levels[vars_vecm], k_ar_diff=k_ar_diff)
+    k_ar_diff = _select_k_ar_diff(levels[vars_vecm])
+    if k_ar_diff == 2:
+        k_ar_diff = _parse_johansen_k_diff(joh_summary)
+    ect, ect_meta = _compute_ect(levels[vars_vecm], k_ar_diff=k_ar_diff, train_end=TRAIN_END)
 
     diffs = levels[vars_vecm].diff()
     vecm_state = diffs.add_prefix("d_")

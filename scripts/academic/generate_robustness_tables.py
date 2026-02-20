@@ -55,6 +55,7 @@ from reserves_project.scripts.academic.robustness.horizon_analysis import (
 )
 from reserves_project.scripts.academic.robustness.variable_set_analysis import (
     VariableSetAnalyzer,
+    VARIABLE_SETS,
     variable_set_comparison,
     ranking_consistency_test,
     compute_varset_sensitivity,
@@ -82,7 +83,9 @@ from reserves_project.scripts.academic.robustness.paper_statistics import (
 DATA_DIR = PROJECT_ROOT / "data"
 FORECAST_RESULTS_DIR = DATA_DIR / "forecast_results_academic"
 STATISTICAL_TESTS_DIR = DATA_DIR / "statistical_tests"
+STATISTICAL_TESTS_UNIFIED_DIR = DATA_DIR / "statistical_tests_unified"
 FORECAST_PREP_DIR = DATA_DIR / "forecast_prep_academic"
+UNIFIED_RESULTS_DIR = DATA_DIR / "forecast_results_unified"
 OUTPUT_DIR = DATA_DIR / "robustness"
 
 # Create output directories
@@ -102,25 +105,36 @@ def load_statistical_test_results():
     """Load existing DM and MCS results from Phase 4."""
     results = {}
 
-    # MCS results
-    mcs_path = STATISTICAL_TESTS_DIR / "mcs_results.json"
-    if mcs_path.exists():
-        with open(mcs_path) as f:
-            results['mcs_results'] = json.load(f)
+    def _load_from_dir(base_dir: Path) -> dict:
+        data = {}
+        if base_dir is None:
+            return data
 
-    # MCS summary
-    mcs_summary_path = STATISTICAL_TESTS_DIR / "mcs_summary.csv"
-    if mcs_summary_path.exists():
-        results['mcs_summary'] = pd.read_csv(mcs_summary_path)
+        mcs_path = base_dir / "mcs_results.json"
+        if mcs_path.exists():
+            with open(mcs_path) as f:
+                data["mcs_results"] = json.load(f)
 
-    # DM test matrix
-    dm_stats_path = STATISTICAL_TESTS_DIR / "dm_test_matrix.csv"
-    if dm_stats_path.exists():
-        results['dm_stats'] = pd.read_csv(dm_stats_path, index_col=0)
+        mcs_summary_path = base_dir / "mcs_summary.csv"
+        if mcs_summary_path.exists():
+            data["mcs_summary"] = pd.read_csv(mcs_summary_path)
 
-    dm_pvalues_path = STATISTICAL_TESTS_DIR / "dm_pvalues_matrix.csv"
-    if dm_pvalues_path.exists():
-        results['dm_pvalues'] = pd.read_csv(dm_pvalues_path, index_col=0)
+        dm_stats_path = base_dir / "dm_test_matrix.csv"
+        if dm_stats_path.exists():
+            data["dm_stats"] = pd.read_csv(dm_stats_path, index_col=0)
+
+        dm_pvalues_path = base_dir / "dm_pvalues_matrix.csv"
+        if dm_pvalues_path.exists():
+            data["dm_pvalues"] = pd.read_csv(dm_pvalues_path, index_col=0)
+
+        return data
+
+    unified = _load_from_dir(STATISTICAL_TESTS_UNIFIED_DIR)
+    legacy = _load_from_dir(STATISTICAL_TESTS_DIR)
+
+    results.update(unified)
+    for key, value in legacy.items():
+        results.setdefault(key, value)
 
     return results
 
@@ -216,6 +230,141 @@ def load_baseline_forecasts():
             df = pd.read_csv(filepath, parse_dates=['date'])
             results[model] = df
 
+    return results
+
+
+def load_unified_results():
+    """Load unified rolling-origin summaries and forecasts."""
+    summaries = {}
+    forecasts = {}
+
+    candidate_dirs = [
+        UNIFIED_RESULTS_DIR,
+        PROJECT_ROOT / "reserves_project" / "data" / "forecast_results_unified",
+        Path.cwd() / "data" / "forecast_results_unified",
+    ]
+
+    unified_dir = None
+    for candidate in candidate_dirs:
+        if candidate.exists():
+            unified_dir = candidate
+            break
+
+    if unified_dir is None:
+        return summaries, forecasts
+
+    for varset in ['parsimonious', 'bop', 'monetary', 'pca', 'full']:
+        summary_path = unified_dir / f"rolling_origin_summary_{varset}.csv"
+        if summary_path.exists():
+            summaries[varset] = pd.read_csv(summary_path)
+
+        forecast_path = unified_dir / f"rolling_origin_forecasts_{varset}.csv"
+        if forecast_path.exists():
+            forecasts[varset] = pd.read_csv(forecast_path, parse_dates=['forecast_date', 'forecast_origin'])
+
+    return summaries, forecasts
+
+
+def build_main_accuracy_from_unified(
+    summaries: dict,
+    mcs_summary: pd.DataFrame | None = None,
+    varset: str = 'parsimonious',
+    horizon: int = 1,
+    split: str = 'test',
+) -> pd.DataFrame | None:
+    df = summaries.get(varset)
+    if df is None or df.empty:
+        return None
+
+    df = df[(df['horizon'] == horizon) & (df['split'] == split)].copy()
+    if df.empty:
+        return None
+
+    df = df.rename(columns={
+        'model': 'Model',
+        'rmse': 'RMSE',
+        'mae': 'MAE',
+        'mape': 'MAPE',
+        'policy_loss': 'Policy_Loss',
+    })
+
+    df['Rank'] = df['RMSE'].rank(method='min').astype(int)
+    df['In_MCS'] = False
+    if mcs_summary is not None and not mcs_summary.empty:
+        if 'Model' in mcs_summary.columns:
+            in_mcs = mcs_summary.set_index('Model')['In_MCS'].to_dict()
+            df['In_MCS'] = df['Model'].map(in_mcs).fillna(False)
+    cols = ['Model', 'RMSE', 'MAE', 'MAPE', 'Policy_Loss', 'In_MCS', 'Rank']
+    existing = [c for c in cols if c in df.columns]
+    return df[existing]
+
+
+def build_horizon_results_from_unified(
+    summaries: dict,
+    varset: str = 'parsimonious',
+    split: str = 'test',
+) -> pd.DataFrame | None:
+    df = summaries.get(varset)
+    if df is None or df.empty:
+        return None
+
+    df = df[df['split'] == split].copy()
+    if df.empty:
+        return None
+
+    df = df.rename(columns={
+        'model': 'Model',
+        'horizon': 'Horizon',
+        'rmse': 'RMSE',
+    })
+    return df[['Model', 'Horizon', 'RMSE']]
+
+
+def build_varset_results_from_unified(
+    summaries: dict,
+    horizon: int = 1,
+    split: str = 'test',
+) -> pd.DataFrame | None:
+    rows = []
+    for varset, df in summaries.items():
+        df = df[(df['horizon'] == horizon) & (df['split'] == split)].copy()
+        if df.empty:
+            continue
+
+        varset_name = VARIABLE_SETS.get(varset, {}).get('name', varset.title())
+        for _, row in df.iterrows():
+            rows.append({
+                'Variable_Set': varset_name,
+                'Variable_Set_Key': varset,
+                'Model': row['model'],
+                'RMSE': row['rmse'],
+            })
+
+    if not rows:
+        return None
+
+    return pd.DataFrame(rows)
+
+
+def build_subsample_results_from_unified(
+    forecasts: dict,
+    varset: str = 'parsimonious',
+    horizon: int = 1,
+) -> pd.DataFrame | None:
+    df = forecasts.get(varset)
+    if df is None or df.empty:
+        return None
+
+    df = df[df['horizon'] == horizon].copy()
+    if df.empty:
+        return None
+
+    # Pivot to wide format for SubsampleAnalyzer
+    wide = df.pivot_table(index='forecast_date', columns='model', values='forecast')
+    actuals = df.groupby('forecast_date')['actual'].first()
+
+    analyzer = SubsampleAnalyzer()
+    results = analyzer.analyze(wide.reset_index().rename(columns={'forecast_date': 'date'}), actuals, date_col='date')
     return results
 
 
@@ -456,19 +605,38 @@ def main():
     dma_results = load_dma_results()
     print(f"Loaded DMA results: {list(dma_results.keys())}")
 
+    # Unified rolling-origin results
+    unified_summaries, unified_forecasts = load_unified_results()
+    if unified_summaries:
+        print(f"Loaded unified summaries: {list(unified_summaries.keys())}")
+    if unified_forecasts:
+        print(f"Loaded unified forecasts: {list(unified_forecasts.keys())}")
+
     # Baseline forecasts
     baseline_results = load_baseline_forecasts()
     print(f"Loaded baseline models: {list(baseline_results.keys())}")
 
     # Run robustness analyses
-    subsample_results = run_subsample_analysis(
-        comb_results.get('backtest'),
-        baseline_results
-    )
+    subsample_results = None
+    if unified_forecasts:
+        subsample_results = build_subsample_results_from_unified(unified_forecasts)
+    if subsample_results is None:
+        subsample_results = run_subsample_analysis(
+            comb_results.get('backtest'),
+            baseline_results
+        )
 
-    horizon_results = run_horizon_analysis(favar_results, bvar_results)
+    horizon_results = None
+    if unified_summaries:
+        horizon_results = build_horizon_results_from_unified(unified_summaries)
+    if horizon_results is None:
+        horizon_results = run_horizon_analysis(favar_results, bvar_results)
 
-    varset_results = run_variable_set_analysis(bvar_results)
+    varset_results = None
+    if unified_summaries:
+        varset_results = build_varset_results_from_unified(unified_summaries)
+    if varset_results is None:
+        varset_results = run_variable_set_analysis(bvar_results)
 
     # Generate LaTeX tables
     print("\n" + "="*60)
@@ -478,7 +646,20 @@ def main():
     table_generator = LaTeXTableGenerator(TABLES_DIR)
 
     # Table 1: Main accuracy
-    if 'mcs_summary' in stat_results and 'dm_stats' in stat_results:
+    main_accuracy_df = None
+    if unified_summaries:
+        main_accuracy_df = build_main_accuracy_from_unified(
+            unified_summaries,
+            stat_results.get('mcs_summary'),
+        )
+    if main_accuracy_df is not None:
+        latex = table_generator.generate_table1_accuracy(
+            main_accuracy_df,
+            pd.DataFrame()
+        )
+        path = table_generator.save_table(latex, 'table1_accuracy.tex')
+        print(f"Generated (unified): {path}")
+    elif 'mcs_summary' in stat_results and 'dm_stats' in stat_results:
         latex = table_generator.generate_table1_accuracy(
             stat_results['mcs_summary'],
             stat_results['dm_stats']

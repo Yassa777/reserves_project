@@ -10,10 +10,12 @@ import numpy as np
 import pandas as pd
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.vector_ar.vecm import VECM
+import warnings
 
 from forecasting_models.data_loader import (
     get_results_dir,
-    load_johansen_rank,
+    estimate_johansen_rank,
+    estimate_k_ar_diff,
     load_prep_csv,
     load_prep_metadata,
 )
@@ -22,6 +24,27 @@ from forecasting_models.ms_switching_var import MarkovSwitchingVAR
 
 
 TARGET_VAR = "gross_reserves_usd_m"
+
+def _select_arima_order(y: pd.Series, exog: pd.DataFrame | None, d: int = 1):
+    candidates = [(p, d, q) for p in range(0, 4) for q in range(0, 4)]
+    best = None
+    for order in candidates:
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                model = SARIMAX(
+                    y,
+                    order=order,
+                    exog=exog,
+                    enforce_stationarity=False,
+                    enforce_invertibility=False,
+                )
+                res = model.fit(disp=False)
+            if best is None or res.aic < best[0]:
+                best = (res.aic, order)
+        except Exception:
+            continue
+    return best[1] if best else (1, d, 1)
 
 
 def _rolling_arima(df: pd.DataFrame, exog_vars: list[str], refit_interval: int = 12):
@@ -34,13 +57,15 @@ def _rolling_arima(df: pd.DataFrame, exog_vars: list[str], refit_interval: int =
     forecasts = []
     last_refit = -refit_interval
     model = None
-    order = (2, 1, 2)
+    order = None
 
     for i, (date, row) in enumerate(future.iterrows()):
         if i - last_refit >= refit_interval or model is None:
             hist = pd.concat([train, future.iloc[:i]])
             y = hist[TARGET_VAR]
             exog = hist[exog_vars] if exog_vars else None
+            if order is None:
+                order = _select_arima_order(y, exog, d=1)
             model = SARIMAX(y, order=order, exog=exog, enforce_stationarity=False, enforce_invertibility=False)
             model = model.fit(disp=False)
             last_refit = i
@@ -161,7 +186,9 @@ def run_backtests(refit_interval: int = 12, varset: str | None = None):
         print(f"Varset: {varset}")
 
     meta = load_prep_metadata(varset)
-    joh_rank = load_johansen_rank()
+    train_end = pd.Timestamp(meta["splits"]["train_end"])
+    k_ar_diff = estimate_k_ar_diff(vecm_levels, train_end=train_end)
+    joh_rank = estimate_johansen_rank(vecm_levels, train_end=train_end, k_ar_diff=k_ar_diff)
 
     arima_df = load_prep_csv("arima_prep_dataset.csv", varset)
     vecm_levels = load_prep_csv("vecm_levels_dataset.csv", varset)
@@ -172,7 +199,7 @@ def run_backtests(refit_interval: int = 12, varset: str | None = None):
     level_series = arima_df.set_index("date")[TARGET_VAR]
 
     arima_bt = _rolling_arima(arima_df, meta["arima"]["arima_exog_vars"], refit_interval)
-    vecm_bt = _rolling_vecm(vecm_levels, joh_rank, meta["vecm"]["ect_metadata"].get("k_ar_diff", 2), refit_interval)
+    vecm_bt = _rolling_vecm(vecm_levels, joh_rank, k_ar_diff, refit_interval)
     msvar_bt = _rolling_msvar(ms_var_raw.join(ms_var_scaled["regime_init_high_vol"]), level_series, refit_interval)
     msvecm_bt = _rolling_msvecm(ms_vecm_state, level_series, refit_interval)
     naive_bt = _rolling_naive(arima_df)
