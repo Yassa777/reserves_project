@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reserves-project"
+version = "0.1.0"
+description = "Reserves forecasting research pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.scripts]
+reserves-unified = "reserves_project.cli.unified:main"
+reserves-stat-tests = "reserves_project.cli.stat_tests:main"
+reserves-tables = "reserves_project.cli.tables:main"
+reserves-tune-ml = "reserves_project.cli.tune_ml:main"
+
+[tool.setuptools]
+packages = [
+  "reserves_project",
+  "reserves_project.config",
+  "reserves_project.utils",
+  "reserves_project.cli",
+  "reserves_project.models",
+  "reserves_project.eval",
+  "reserves_project.pipelines",
+]

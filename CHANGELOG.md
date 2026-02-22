@@ -22,3 +22,4 @@
 - Added Policy Loss column to Table 1 LaTeX output when available.
 - Extended statistical tests to support unified rolling-origin outputs (DM/MCS).
 - Added support for tuned XGBoost/LSTM parameter JSONs that store `best_params`.
+- Began full package restructure: added `reserves_project` modules for eval/models/pipelines and wired new console entry points.
