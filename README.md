@@ -99,6 +99,10 @@ python scripts/prepare_forecasting_data.py
 reserves-diagnostics
 reserves-forecast-prep --varset baseline
 
+# Baseline forecasts + rolling backtests
+reserves-forecast-baselines --varset baseline
+reserves-rolling-backtests --varset baseline --refit-interval 12
+
 # Run baseline forecasting models (ARIMA, VECM, regime proxies)
 python scripts/run_forecasting_models.py
 

@@ -30,7 +30,7 @@ def render(selected_categories):
     rolling_path = results_dir / "rolling_backtests.csv"
 
     if summary_json is None or not rolling_summary_path.exists() or not rolling_path.exists():
-        st.warning("Run `python scripts/run_forecasting_models.py` and `python scripts/run_rolling_backtests.py` first.")
+        st.warning("Run `reserves-forecast-baselines` and `reserves-rolling-backtests` first.")
         return
 
     # Baseline summary table

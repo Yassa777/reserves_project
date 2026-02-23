@@ -27,3 +27,4 @@
 - Added run manifests for unified evaluation, statistical tests, robustness tables, and ML tuning outputs.
 - Migrated diagnostics + forecasting prep into `reserves_project` packages with console scripts and shims.
 - Migrated Streamlit apps into `reserves_project.apps` and replaced top-level apps with shims.
+- Migrated baseline forecasting models + rolling backtests into `reserves_project.forecasting_models` and pipelines.
