@@ -25,8 +25,9 @@ def get_prep_dir(varset: str | None = None) -> Path:
     return DATA_DIR / f"forecast_prep{_dir_suffix(varset)}"
 
 
-def get_results_dir(varset: str | None = None) -> Path:
-    path = DATA_DIR / f"forecast_results{_dir_suffix(varset)}"
+def get_results_dir(varset: str | None = None, output_root: Path | None = None) -> Path:
+    base = output_root if output_root is not None else DATA_DIR
+    path = base / f"forecast_results{_dir_suffix(varset)}"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
