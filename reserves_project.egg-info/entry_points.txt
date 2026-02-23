@@ -1,0 +1,11 @@
+[console_scripts]
+reserves-diagnostics = reserves_project.cli.diagnostics:main
+reserves-forecast-baselines = reserves_project.cli.forecast_baselines:main
+reserves-forecast-prep = reserves_project.cli.forecast_prep:main
+reserves-rolling-backtests = reserves_project.cli.rolling_backtests:main
+reserves-scenarios = reserves_project.cli.scenarios:main
+reserves-stat-tests = reserves_project.cli.stat_tests:main
+reserves-tables = reserves_project.cli.tables:main
+reserves-tune-ml = reserves_project.cli.tune_ml:main
+reserves-unified = reserves_project.cli.unified:main
+slreserves = reserves_project.cli.main:main

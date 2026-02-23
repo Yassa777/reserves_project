@@ -1,0 +1,46 @@
+# Full Conda environment (including ML models)
+# Create with: conda env create -f environment-full.yml
+# Activate with: conda activate slreserves-full
+
+name: slreserves-full
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python
+  - python>=3.10,<3.13
+
+  # Core Data Science
+  - numpy=1.26.4
+  - pandas=2.1.4
+  - scipy=1.16.0
+
+  # Time Series & Econometrics
+  - statsmodels=0.14.0
+  - arch-py=8.0.0
+  - hmmlearn=0.3.2
+
+  # Machine Learning
+  - scikit-learn=1.7.0
+  - xgboost=3.2.0
+  - tensorflow=2.19.0
+
+  # Visualization
+  - matplotlib=3.10.3
+  - seaborn=0.12.2
+  - plotly=5.24.1
+
+  # Dashboard
+  - streamlit=1.49.1
+
+  # Testing & Development
+  - pytest=8.3.5
+  - pytest-cov=6.1.1
+  - jupyter
+  - ipykernel
+
+  # pip-only packages
+  - pip
+  - pip:
+    - ruptures==1.1.10

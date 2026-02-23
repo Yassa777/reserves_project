@@ -1,0 +1,30 @@
+# Sri Lanka Reserves Forecasting - Core Dependencies
+# Generated: 2026-02-23
+# Python >= 3.10 required
+
+# === Core Data Science ===
+numpy==1.26.4
+pandas==2.1.4
+scipy==1.16.0
+
+# === Time Series & Econometrics ===
+statsmodels==0.14.0
+arch==8.0.0                  # GARCH models, ARCH-LM tests
+hmmlearn==0.3.2              # Hidden Markov Models (MS-VAR)
+ruptures==1.1.10             # Change point detection (Bai-Perron)
+
+# === Machine Learning ===
+scikit-learn==1.7.0
+
+# === Visualization ===
+matplotlib==3.10.3
+seaborn==0.12.2
+plotly==5.24.1
+
+# === Dashboard ===
+streamlit==1.49.1
+
+# === Optional: Deep Learning (large install) ===
+# Uncomment if using LSTM models
+# tensorflow==2.19.0
+# xgboost==3.2.0
