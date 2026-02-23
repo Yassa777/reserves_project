@@ -103,6 +103,10 @@ reserves-forecast-prep --varset baseline
 reserves-forecast-baselines --varset baseline
 reserves-rolling-backtests --varset baseline --refit-interval 12
 
+# Optional: write outputs under data/outputs/<run-id>/
+reserves-forecast-baselines --varset baseline --run-id 2026-02-23_baselines
+reserves-rolling-backtests --varset baseline --refit-interval 12 --run-id 2026-02-23_baselines
+
 # Run baseline forecasting models (ARIMA, VECM, regime proxies)
 python scripts/run_forecasting_models.py
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.vector_ar.vecm import VECM
 import warnings
 
+from reserves_project.config.paths import DATA_DIR
 from reserves_project.forecasting_models.data_loader import (
     get_results_dir,
     estimate_johansen_rank,
@@ -178,7 +180,11 @@ def _rolling_naive(df: pd.DataFrame):
     return pd.DataFrame(forecasts)
 
 
-def run_backtests(refit_interval: int = 12, varset: str | None = None):
+def run_backtests(
+    refit_interval: int = 12,
+    varset: str | None = None,
+    output_root: Path | None = None,
+):
     print("=" * 70)
     print("ROLLING BACKTESTS")
     print("=" * 70)
@@ -206,7 +212,7 @@ def run_backtests(refit_interval: int = 12, varset: str | None = None):
     naive_bt = _rolling_naive(arima_df)
 
     all_bt = pd.concat([arima_bt, vecm_bt, msvar_bt, msvecm_bt, naive_bt], ignore_index=True)
-    results_dir = get_results_dir(varset)
+    results_dir = get_results_dir(varset, output_root=output_root)
     bt_path = results_dir / "rolling_backtests.csv"
     all_bt.to_csv(bt_path, index=False)
 
@@ -233,7 +239,14 @@ def run_backtests(refit_interval: int = 12, varset: str | None = None):
             indent=2,
         )
 
-    write_run_manifest(results_dir, {"refit_interval": refit_interval, "varset": meta.get("varset", varset or "baseline")})
+    write_run_manifest(
+        results_dir,
+        {
+            "refit_interval": refit_interval,
+            "varset": meta.get("varset", varset or "baseline"),
+            "output_root": str(output_root) if output_root is not None else None,
+        },
+    )
 
     print("Saved:")
     print(f"  - {bt_path}")
@@ -250,5 +263,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run rolling backtests.")
     parser.add_argument("--varset", default=None, help="Variable set to use (baseline or expanded).")
     parser.add_argument("--refit-interval", type=int, default=12)
+    parser.add_argument("--run-id", default=None, help="Optional run ID to nest outputs in data/outputs/<run-id>/.")
+    parser.add_argument("--output-root", default=None, help="Optional output root (overrides --run-id).")
     args = parser.parse_args()
-    run_backtests(refit_interval=args.refit_interval, varset=args.varset)
+    output_root = None
+    if args.output_root:
+        output_root = Path(args.output_root)
+    elif args.run_id:
+        output_root = DATA_DIR / "outputs" / args.run_id
+    run_backtests(refit_interval=args.refit_interval, varset=args.varset, output_root=output_root)

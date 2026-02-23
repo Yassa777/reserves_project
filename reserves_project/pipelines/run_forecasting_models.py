@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from reserves_project.config.paths import DATA_DIR
 from reserves_project.forecasting_models.arima_model import run_arima_forecast
 from reserves_project.forecasting_models.vecm_model import run_vecm_forecast
 from reserves_project.forecasting_models.regime_var_model import run_regime_var_forecast
@@ -41,7 +42,11 @@ def _build_naive_forecast(
     return out
 
 
-def run_forecasts(varset: str | None = None, verbose: bool = True):
+def run_forecasts(
+    varset: str | None = None,
+    verbose: bool = True,
+    output_root: Path | None = None,
+):
     if verbose:
         print("=" * 70)
         print("FORECASTING MODELS")
@@ -61,7 +66,7 @@ def run_forecasts(varset: str | None = None, verbose: bool = True):
     k_ar_diff = estimate_k_ar_diff(vecm_levels, train_end=train_end)
     joh_rank = estimate_johansen_rank(vecm_levels, train_end=train_end, k_ar_diff=k_ar_diff)
 
-    results_dir = get_results_dir(varset)
+    results_dir = get_results_dir(varset, output_root=output_root)
 
     # ARIMA
     arima_out, arima_summary = run_arima_forecast(arima_df, meta["arima"]["arima_exog_vars"])
@@ -111,6 +116,7 @@ def run_forecasts(varset: str | None = None, verbose: bool = True):
         "timestamp": str(datetime.now()),
         "varset": meta.get("varset", varset or "baseline"),
         "missing_strategy": meta.get("missing_strategy"),
+        "output_root": str(output_root) if output_root is not None else None,
         "arima": arima_summary,
         "vecm": vecm_summary,
         "ms_var": reg_var_summary,
@@ -138,5 +144,12 @@ def run_forecasts(varset: str | None = None, verbose: bool = True):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run forecasting baselines.")
     parser.add_argument("--varset", default=None, help="Variable set to use (baseline or expanded).")
+    parser.add_argument("--run-id", default=None, help="Optional run ID to nest outputs in data/outputs/<run-id>/.")
+    parser.add_argument("--output-root", default=None, help="Optional output root (overrides --run-id).")
     args = parser.parse_args()
-    run_forecasts(varset=args.varset, verbose=True)
+    output_root = None
+    if args.output_root:
+        output_root = Path(args.output_root)
+    elif args.run_id:
+        output_root = DATA_DIR / "outputs" / args.run_id
+    run_forecasts(varset=args.varset, verbose=True, output_root=output_root)
