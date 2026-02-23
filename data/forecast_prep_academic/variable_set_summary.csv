@@ -1,0 +1,2 @@
+variable_set,n_arima_exog,n_vecm_vars,n_var_vars,total_obs,train_obs,valid_obs,test_obs,date_start,date_end
+parsimonious,2,3,3,228,156,36,36,2007-01-01,2025-12-01

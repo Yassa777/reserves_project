@@ -48,6 +48,7 @@ Z_95 = 1.959963984540
 class ForecastOutput:
     mean: np.ndarray
     std: Optional[np.ndarray] = None
+    quantiles: Optional[Dict[float, np.ndarray]] = None
 
 
 class BaseForecaster:
@@ -357,34 +358,7 @@ class BVARForecaster(BaseForecaster):
         return ForecastOutput(mean=mean, std=std)
 
 
-class XGBoostForecaster(BaseForecaster):
-    def __init__(
-        self,
-        target_col: str,
-        exog_cols: Optional[List[str]] = None,
-        lags: List[int] | None = None,
-        exog_lags: List[int] | None = None,
-        params: Optional[Dict] = None,
-    ):
-        if not HAS_XGBOOST:
-            raise RuntimeError("XGBoost not available")
-        self.name = "XGBoost"
-        self.target_col = target_col
-        self.exog_cols = exog_cols or []
-        self.lags = lags or [1, 2, 3, 6, 12]
-        self.exog_lags = exog_lags or [1, 3]
-        self.params = params or {
-            "n_estimators": 200,
-            "max_depth": 4,
-            "learning_rate": 0.1,
-            "subsample": 0.8,
-            "colsample_bytree": 0.8,
-            "random_state": 42,
-        }
-        self.model = None
-        self.feature_cols: List[str] = []
-        self.resid_std: float | None = None
-
+class XGBoostFeatureBuilder:
     def _build_supervised(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         features = pd.DataFrame(index=df.index)
         target = df[self.target_col]
@@ -408,17 +382,6 @@ class XGBoostForecaster(BaseForecaster):
         X = supervised.drop(columns=["target"])
         y = supervised["target"]
         return X, y
-
-    def fit(self, train_df: pd.DataFrame) -> None:
-        X, y = self._build_supervised(train_df)
-        if len(X) < 10:
-            raise RuntimeError("Insufficient observations for XGBoost")
-        model = xgb.XGBRegressor(**self.params)
-        model.fit(X, y, verbose=False)
-        self.model = model
-        self.feature_cols = list(X.columns)
-        resid = y - model.predict(X)
-        self.resid_std = float(np.std(resid)) if len(resid) else np.nan
 
     def _get_lag_value(self, series: pd.Series, date: pd.Timestamp, lag: int) -> float:
         lag_date = date - pd.DateOffset(months=lag)
@@ -466,6 +429,46 @@ class XGBoostForecaster(BaseForecaster):
 
         return features
 
+
+class XGBoostForecaster(XGBoostFeatureBuilder, BaseForecaster):
+    def __init__(
+        self,
+        target_col: str,
+        exog_cols: Optional[List[str]] = None,
+        lags: List[int] | None = None,
+        exog_lags: List[int] | None = None,
+        params: Optional[Dict] = None,
+    ):
+        if not HAS_XGBOOST:
+            raise RuntimeError("XGBoost not available")
+        self.name = "XGBoost"
+        self.target_col = target_col
+        self.exog_cols = exog_cols or []
+        self.lags = lags or [1, 2, 3, 6, 12]
+        self.exog_lags = exog_lags or [1, 3]
+        self.params = params or {
+            "n_estimators": 200,
+            "max_depth": 4,
+            "learning_rate": 0.1,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "random_state": 42,
+        }
+        self.model = None
+        self.feature_cols: List[str] = []
+        self.resid_std: float | None = None
+
+    def fit(self, train_df: pd.DataFrame) -> None:
+        X, y = self._build_supervised(train_df)
+        if len(X) < 10:
+            raise RuntimeError("Insufficient observations for XGBoost")
+        model = xgb.XGBRegressor(**self.params)
+        model.fit(X, y, verbose=False)
+        self.model = model
+        self.feature_cols = list(X.columns)
+        resid = y - model.predict(X)
+        self.resid_std = float(np.std(resid)) if len(resid) else np.nan
+
     def predict(
         self,
         history_df: pd.DataFrame,
@@ -503,6 +506,99 @@ class XGBoostForecaster(BaseForecaster):
 
         std = np.full(horizon, self.resid_std) if self.resid_std is not None else None
         return ForecastOutput(mean=np.asarray(preds), std=std)
+
+
+class XGBoostQuantileForecaster(XGBoostFeatureBuilder, BaseForecaster):
+    def __init__(
+        self,
+        target_col: str,
+        exog_cols: Optional[List[str]] = None,
+        lags: List[int] | None = None,
+        exog_lags: List[int] | None = None,
+        params: Optional[Dict] = None,
+        quantiles: Optional[List[float]] = None,
+    ):
+        if not HAS_XGBOOST:
+            raise RuntimeError("XGBoost not available")
+        self.name = "XGB-Quantile"
+        self.target_col = target_col
+        self.exog_cols = exog_cols or []
+        self.lags = lags or [1, 2, 3, 6, 12]
+        self.exog_lags = exog_lags or [1, 3]
+        self.params = params or {
+            "n_estimators": 200,
+            "max_depth": 4,
+            "learning_rate": 0.1,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "random_state": 42,
+        }
+        self.quantiles = quantiles or [0.025, 0.1, 0.5, 0.9, 0.975]
+        if 0.5 not in self.quantiles:
+            raise RuntimeError("Quantile forecaster requires a 0.5 quantile for point forecasts")
+        self.models: Dict[float, object] = {}
+        self.feature_cols: List[str] = []
+
+    def fit(self, train_df: pd.DataFrame) -> None:
+        X, y = self._build_supervised(train_df)
+        if len(X) < 10:
+            raise RuntimeError("Insufficient observations for XGBoost quantile regression")
+        self.feature_cols = list(X.columns)
+        self.models = {}
+        for q in self.quantiles:
+            params = dict(self.params)
+            params["objective"] = "reg:quantileerror"
+            params["quantile_alpha"] = q
+            try:
+                model = xgb.XGBRegressor(**params)
+                model.fit(X, y, verbose=False)
+            except Exception as exc:
+                raise RuntimeError(
+                    "XGBoost quantile objective not available (reg:quantileerror). "
+                    "Upgrade xgboost or disable XGB-Quantile."
+                ) from exc
+            self.models[q] = model
+
+    def predict(
+        self,
+        history_df: pd.DataFrame,
+        horizon: int,
+        exog_future: Optional[pd.DataFrame] = None,
+    ) -> ForecastOutput:
+        if not self.models:
+            raise RuntimeError("XGBoost quantile model not fitted")
+        history = history_df.copy().sort_index()
+        target_series = history[self.target_col].copy()
+
+        exog_full = None
+        if self.exog_cols:
+            exog_hist = history[self.exog_cols].copy()
+            exog_full = exog_hist
+            if exog_future is not None:
+                exog_full = pd.concat([exog_hist, exog_future])
+
+        last_date = history.index.max()
+        forecast_dates = pd.date_range(
+            start=last_date + pd.DateOffset(months=1),
+            periods=horizon,
+            freq="MS",
+        )
+
+        quantile_preds: Dict[float, List[float]] = {q: [] for q in self.quantiles}
+
+        for fdate in forecast_dates:
+            features = self._build_feature_vector(target_series, exog_full, fdate)
+            row = pd.DataFrame([features]).reindex(columns=self.feature_cols)
+            step_preds = {}
+            for q, model in self.models.items():
+                step_preds[q] = float(model.predict(row)[0])
+                quantile_preds[q].append(step_preds[q])
+            median = step_preds[0.5]
+            target_series.loc[fdate] = median
+
+        mean = np.asarray(quantile_preds[0.5])
+        quantiles = {q: np.asarray(vals) for q, vals in quantile_preds.items()}
+        return ForecastOutput(mean=mean, std=None, quantiles=quantiles)
 
 
 class MSVARForecaster(BaseForecaster):
@@ -841,6 +937,36 @@ def log_score_gaussian(y: float, mu: float, sigma: float) -> float:
     return -0.5 * log(2 * pi * sigma ** 2) - 0.5 * z ** 2
 
 
+def pinball_loss(y: float, q: float, tau: float) -> float:
+    if y == y and q == q:
+        if y >= q:
+            return tau * (y - q)
+        return (1.0 - tau) * (q - y)
+    return np.nan
+
+
+def crps_from_quantiles(y: float, quantiles: Dict[float, float]) -> float:
+    if y != y or not quantiles:
+        return np.nan
+    taus = np.array(sorted(quantiles.keys()))
+    qs = np.array([quantiles[t] for t in taus])
+    if np.isnan(qs).any():
+        return np.nan
+    losses = np.array([pinball_loss(y, q, tau) for q, tau in zip(qs, taus)])
+    if np.isnan(losses).any():
+        return np.nan
+    return 2.0 * float(np.mean(losses))
+
+
+def select_quantile(quantiles: Dict[float, float], target: float) -> float:
+    if not quantiles:
+        return np.nan
+    if target in quantiles:
+        return quantiles[target]
+    closest = min(quantiles.keys(), key=lambda x: abs(x - target))
+    return quantiles[closest]
+
+
 def erf(x: float) -> float:
     # Approximate error function (Abramowitz-Stegun)
     # Avoid scipy dependency in core evaluation.
@@ -932,6 +1058,7 @@ class RollingOriginEvaluator:
                     continue
                 mean = output.mean
                 std = output.std if output.std is not None else np.full(max_h, np.nan)
+                quantiles = output.quantiles
 
                 for h in self.horizons:
                     fdate = forecast_index[h - 1]
@@ -939,18 +1066,27 @@ class RollingOriginEvaluator:
                     mu = mean[h - 1]
                     sigma = std[h - 1] if std is not None else np.nan
 
-                    lower_80 = mu - Z_80 * sigma if sigma == sigma else np.nan
-                    upper_80 = mu + Z_80 * sigma if sigma == sigma else np.nan
-                    lower_95 = mu - Z_95 * sigma if sigma == sigma else np.nan
-                    upper_95 = mu + Z_95 * sigma if sigma == sigma else np.nan
+                    if quantiles:
+                        q_vals = {tau: arr[h - 1] for tau, arr in quantiles.items()}
+                        lower_80 = select_quantile(q_vals, 0.1)
+                        upper_80 = select_quantile(q_vals, 0.9)
+                        lower_95 = select_quantile(q_vals, 0.025)
+                        upper_95 = select_quantile(q_vals, 0.975)
+                        crps = crps_from_quantiles(actual, q_vals) if actual == actual else np.nan
+                        log_score = np.nan
+                        sigma = np.nan
+                    else:
+                        lower_80 = mu - Z_80 * sigma if sigma == sigma else np.nan
+                        upper_80 = mu + Z_80 * sigma if sigma == sigma else np.nan
+                        lower_95 = mu - Z_95 * sigma if sigma == sigma else np.nan
+                        upper_95 = mu + Z_95 * sigma if sigma == sigma else np.nan
+                        crps = np.nan
+                        log_score = np.nan
+                        if actual == actual and sigma == sigma:
+                            crps = crps_gaussian(actual, mu, sigma)
+                            log_score = log_score_gaussian(actual, mu, sigma)
 
                     split = "validation" if fdate <= self.valid_end else "test"
-
-                    crps = np.nan
-                    log_score = np.nan
-                    if actual == actual and sigma == sigma:
-                        crps = crps_gaussian(actual, mu, sigma)
-                        log_score = log_score_gaussian(actual, mu, sigma)
 
                     results.append({
                         "model": model.name,
@@ -1038,9 +1174,11 @@ def build_models(
     include_ms: bool = False,
     include_lstm: bool = False,
     include_xgb: bool = True,
+    include_xgb_quantile: bool = False,
     include_llsv: bool = False,
     include_bop: bool = False,
     xgb_params: Optional[Dict] = None,
+    xgb_quantiles: Optional[List[float]] = None,
     lstm_params: Optional[Dict] = None,
 ) -> List[BaseForecaster]:
     models: List[BaseForecaster] = [
@@ -1052,6 +1190,15 @@ def build_models(
         models.append(BVARForecaster(target_col, system_cols=[target_col] + exog_cols))
     if include_xgb and HAS_XGBOOST:
         models.append(XGBoostForecaster(target_col, exog_cols=exog_cols, params=xgb_params))
+    if include_xgb_quantile and HAS_XGBOOST:
+        models.append(
+            XGBoostQuantileForecaster(
+                target_col,
+                exog_cols=exog_cols,
+                params=xgb_params,
+                quantiles=xgb_quantiles,
+            )
+        )
     if include_ms:
         models.append(MSVARForecaster(target_col, system_cols=[target_col] + exog_cols))
         models.append(MSVECMForecaster(target_col, system_cols=[target_col] + exog_cols))
@@ -1083,6 +1230,7 @@ def main():
     parser.add_argument("--include-bop", action="store_true", help="Include structural BoP identity model")
     parser.add_argument("--exclude-bvar", action="store_true", help="Exclude BVAR adapter")
     parser.add_argument("--exclude-xgb", action="store_true", help="Exclude XGBoost adapter")
+    parser.add_argument("--include-xgb-quantile", action="store_true", help="Include XGBoost quantile adapter")
     args = parser.parse_args()
 
     horizons = [int(h.strip()) for h in args.horizons.split(",") if h.strip()]
@@ -1104,6 +1252,7 @@ def main():
         include_ms=args.include_ms,
         include_lstm=args.include_lstm,
         include_xgb=not args.exclude_xgb,
+        include_xgb_quantile=args.include_xgb_quantile,
         include_llsv=args.include_llsv,
         include_bop=args.include_bop,
     )

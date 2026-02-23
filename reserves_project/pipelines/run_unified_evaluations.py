@@ -37,6 +37,7 @@ def main():
     parser.add_argument("--include-bop", action="store_true")
     parser.add_argument("--exclude-bvar", action="store_true")
     parser.add_argument("--exclude-xgb", action="store_true")
+    parser.add_argument("--include-xgb-quantile", action="store_true")
     parser.add_argument("--xgb-params", default=None, help="Path to JSON with tuned XGBoost params")
     parser.add_argument("--lstm-params", default=None, help="Path to JSON with tuned LSTM params")
     parser.add_argument("--output-dir", default="data/forecast_results_unified")
@@ -84,6 +85,7 @@ def main():
             include_ms=args.include_ms,
             include_lstm=args.include_lstm,
             include_xgb=not args.exclude_xgb,
+            include_xgb_quantile=args.include_xgb_quantile,
             include_llsv=args.include_llsv,
             include_bop=args.include_bop,
             xgb_params=xgb_params,
@@ -122,6 +124,7 @@ def main():
         "include_bop": args.include_bop,
         "exclude_bvar": args.exclude_bvar,
         "exclude_xgb": args.exclude_xgb,
+        "include_xgb_quantile": args.include_xgb_quantile,
         "xgb_params": xgb_params,
         "lstm_params": lstm_params,
         "output_dir": str(output_dir),

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-02-23
+- Added XGBoost quantile regression adapter for probabilistic forecasts and comparison to Gaussian residuals.
+- Added quantile-based CRPS approximation in unified evaluator with interval coverage from quantile outputs.
+- Added `--include-xgb-quantile` flag to unified evaluator and multi-varset runner.
+
 ## 2026-02-19
 - Added a unified rolling-origin evaluator with a common forecast API and exportable summary tables.
 - Added exogenous forecast options (`naive` and univariate `arima`) plus `forecast` vs `actual` exog modes.
