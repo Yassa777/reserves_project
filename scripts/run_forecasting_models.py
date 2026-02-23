@@ -17,4 +17,4 @@ if __name__ == "__main__":
         output_root = Path(args.output_root)
     elif args.run_id:
         output_root = DATA_DIR / "outputs" / args.run_id
-    run_forecasts(varset=args.varset, verbose=True, output_root=output_root)
+    run_forecasts(varset=args.varset, verbose=True, output_root=output_root, run_id=args.run_id)

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from reserves_project.config.paths import DATA_DIR
 from reserves_project.config.varsets import (
     TARGET_VAR,
     TRAIN_END,
@@ -20,7 +21,7 @@ from reserves_project.eval.unified_evaluator import (
     load_varset_levels,
     summarize_results,
 )
-from reserves_project.utils.run_manifest import write_run_manifest
+from reserves_project.utils.run_manifest import write_run_manifest, write_latest_pointer
 
 
 def main():
@@ -39,13 +40,23 @@ def main():
     parser.add_argument("--xgb-params", default=None, help="Path to JSON with tuned XGBoost params")
     parser.add_argument("--lstm-params", default=None, help="Path to JSON with tuned LSTM params")
     parser.add_argument("--output-dir", default="data/forecast_results_unified")
+    parser.add_argument("--run-id", default=None, help="Optional run ID to nest outputs in data/outputs/<run-id>/.")
+    parser.add_argument("--output-root", default=None, help="Optional output root (overrides --run-id).")
     args = parser.parse_args()
 
     varsets = [v.strip() for v in args.varsets.split(",") if v.strip()]
     horizons = [int(h.strip()) for h in args.horizons.split(",") if h.strip()]
 
     exog_forecaster = ARIMAExogForecaster() if args.exog_forecast == "arima" else NaiveExogForecaster()
+    output_root = None
+    if args.output_root:
+        output_root = Path(args.output_root)
+    elif args.run_id:
+        output_root = DATA_DIR / "outputs" / args.run_id
+
     output_dir = Path(args.output_dir)
+    if output_root is not None:
+        output_dir = output_root / "forecast_results_unified"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     def _load_params(path: str | None):
@@ -116,6 +127,8 @@ def main():
         "output_dir": str(output_dir),
     }
     write_run_manifest(output_dir, config)
+    if args.run_id and output_root is not None:
+        write_latest_pointer(DATA_DIR / "outputs", args.run_id, output_root)
 
     print(f"Outputs in {output_dir}")
 

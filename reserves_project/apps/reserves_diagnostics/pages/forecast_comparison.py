@@ -24,13 +24,18 @@ def render(selected_categories):
     st.title("Forecast Comparison")
     st.markdown("*Rolling backtests and baseline forecast comparisons*")
 
-    results_dir = DATA_DIR.parent / "forecast_results"
+    results_dir = DATA_DIR / "forecast_results"
+    latest = _load_json(DATA_DIR / "outputs" / "latest.json")
+    if latest and latest.get("output_root"):
+        candidate = Path(latest["output_root"]) / "forecast_results"
+        if candidate.exists():
+            results_dir = candidate
     summary_json = _load_json(results_dir / "forecast_model_summary.json")
     rolling_summary_path = results_dir / "rolling_backtest_summary.csv"
     rolling_path = results_dir / "rolling_backtests.csv"
 
     if summary_json is None or not rolling_summary_path.exists() or not rolling_path.exists():
-        st.warning("Run `reserves-forecast-baselines` and `reserves-rolling-backtests` first.")
+        st.warning("Run `reserves-forecast-baselines` and `reserves-rolling-backtests` (optionally with --run-id).")
         return
 
     # Baseline summary table

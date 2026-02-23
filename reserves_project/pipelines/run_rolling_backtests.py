@@ -23,7 +23,7 @@ from reserves_project.forecasting_models.data_loader import (
 )
 from reserves_project.eval.metrics import compute_metrics, naive_mae_scale
 from reserves_project.models.ms_switching_var import MarkovSwitchingVAR
-from reserves_project.utils.run_manifest import write_run_manifest
+from reserves_project.utils.run_manifest import write_run_manifest, write_latest_pointer
 
 
 TARGET_VAR = "gross_reserves_usd_m"
@@ -184,6 +184,7 @@ def run_backtests(
     refit_interval: int = 12,
     varset: str | None = None,
     output_root: Path | None = None,
+    run_id: str | None = None,
 ):
     print("=" * 70)
     print("ROLLING BACKTESTS")
@@ -247,6 +248,8 @@ def run_backtests(
             "output_root": str(output_root) if output_root is not None else None,
         },
     )
+    if run_id and output_root is not None:
+        write_latest_pointer(DATA_DIR / "outputs", run_id, output_root)
 
     print("Saved:")
     print(f"  - {bt_path}")
@@ -271,4 +274,4 @@ if __name__ == "__main__":
         output_root = Path(args.output_root)
     elif args.run_id:
         output_root = DATA_DIR / "outputs" / args.run_id
-    run_backtests(refit_interval=args.refit_interval, varset=args.varset, output_root=output_root)
+    run_backtests(refit_interval=args.refit_interval, varset=args.varset, output_root=output_root, run_id=args.run_id)

@@ -53,3 +53,25 @@ def write_run_manifest(
     with open(path, "w") as f:
         json.dump(manifest, f, indent=2, default=str)
     return path
+
+
+def write_latest_pointer(
+    outputs_dir: Path,
+    run_id: str,
+    output_root: Path,
+    extra: Optional[Dict[str, Any]] = None,
+) -> Path:
+    """Write latest pointer for run-id based outputs."""
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "run_id": run_id,
+        "output_root": str(output_root),
+    }
+    if extra:
+        payload["extra"] = extra
+
+    path = outputs_dir / "latest.json"
+    with open(path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+    return path

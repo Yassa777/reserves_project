@@ -29,3 +29,5 @@
 - Migrated Streamlit apps into `reserves_project.apps` and replaced top-level apps with shims.
 - Migrated baseline forecasting models + rolling backtests into `reserves_project.forecasting_models` and pipelines.
 - Added optional `--run-id`/`--output-root` support for baseline forecast and backtest outputs.
+- Added latest run pointer at `data/outputs/latest.json` and enabled apps to auto-use it.
+- Extended `--run-id`/`--output-root` support to unified evaluator, statistical tests, and robustness tables.

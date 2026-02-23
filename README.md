@@ -85,6 +85,11 @@ reserves-stat-tests --use-unified --unified-varset parsimonious --unified-horizo
 # Robustness tables
 reserves-tables
 
+# Run-id bundling (unified/stat-tests/robustness)
+reserves-unified --run-id 2026-02-23_unified --exog-mode forecast --exog-forecast naive --include-ms
+reserves-stat-tests --use-unified --unified-varset parsimonious --unified-horizon 1 --run-id 2026-02-23_unified
+reserves-tables --run-id 2026-02-23_unified
+
 # Tune ML models
 reserves-tune-ml --varset parsimonious
 
@@ -106,6 +111,9 @@ reserves-rolling-backtests --varset baseline --refit-interval 12
 # Optional: write outputs under data/outputs/<run-id>/
 reserves-forecast-baselines --varset baseline --run-id 2026-02-23_baselines
 reserves-rolling-backtests --varset baseline --refit-interval 12 --run-id 2026-02-23_baselines
+
+# Latest pointer
+# When using --run-id, the most recent run is recorded in data/outputs/latest.json
 
 # Run baseline forecasting models (ARIMA, VECM, regime proxies)
 python scripts/run_forecasting_models.py

@@ -21,4 +21,4 @@ def main() -> None:
     elif args.run_id:
         output_root = DATA_DIR / "outputs" / args.run_id
 
-    run_backtests(refit_interval=args.refit_interval, varset=args.varset, output_root=output_root)
+    run_backtests(refit_interval=args.refit_interval, varset=args.varset, output_root=output_root, run_id=args.run_id)

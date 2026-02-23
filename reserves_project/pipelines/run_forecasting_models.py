@@ -23,7 +23,7 @@ from reserves_project.forecasting_models.data_loader import (
     load_prep_metadata,
 )
 from reserves_project.eval.metrics import compute_metrics, naive_mae_scale
-from reserves_project.utils.run_manifest import write_run_manifest
+from reserves_project.utils.run_manifest import write_run_manifest, write_latest_pointer
 
 
 def _save_forecast(df: pd.DataFrame, filename: str, results_dir: Path) -> str:
@@ -46,6 +46,7 @@ def run_forecasts(
     varset: str | None = None,
     verbose: bool = True,
     output_root: Path | None = None,
+    run_id: str | None = None,
 ):
     if verbose:
         print("=" * 70)
@@ -129,6 +130,8 @@ def run_forecasts(
         json.dump(summary, f, indent=2)
 
     write_run_manifest(results_dir, summary)
+    if run_id and output_root is not None:
+        write_latest_pointer(DATA_DIR / "outputs", run_id, output_root)
 
     if verbose:
         print("\nSaved forecasts:")
@@ -152,4 +155,4 @@ if __name__ == "__main__":
         output_root = Path(args.output_root)
     elif args.run_id:
         output_root = DATA_DIR / "outputs" / args.run_id
-    run_forecasts(varset=args.varset, verbose=True, output_root=output_root)
+    run_forecasts(varset=args.varset, verbose=True, output_root=output_root, run_id=args.run_id)

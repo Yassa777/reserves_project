@@ -68,28 +68,22 @@ from reserves_project.robustness.paper_statistics import (
     save_statistics,
     generate_statistics_summary,
 )
-from reserves_project.utils.run_manifest import write_run_manifest
+from reserves_project.utils.run_manifest import write_run_manifest, write_latest_pointer
 
 
 # =============================================================================
-# Configuration
+# Configuration (set in main for run-id overrides)
 # =============================================================================
 
-# Paths
-FORECAST_RESULTS_DIR = DATA_DIR / "forecast_results_academic"
-STATISTICAL_TESTS_DIR = DATA_DIR / "statistical_tests"
-STATISTICAL_TESTS_UNIFIED_DIR = DATA_DIR / "statistical_tests_unified"
-FORECAST_PREP_DIR = DATA_DIR / "forecast_prep_academic"
-UNIFIED_RESULTS_DIR = DATA_DIR / "forecast_results_unified"
-OUTPUT_DIR = DATA_DIR / "robustness"
-
-# Create output directories
-TABLES_DIR = OUTPUT_DIR / "tables"
-FIGURES_DIR = OUTPUT_DIR / "figures"
-SUMMARY_DIR = OUTPUT_DIR / "summary"
-
-for d in [TABLES_DIR, FIGURES_DIR, SUMMARY_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
+FORECAST_RESULTS_DIR = None
+STATISTICAL_TESTS_DIR = None
+STATISTICAL_TESTS_UNIFIED_DIR = None
+FORECAST_PREP_DIR = None
+UNIFIED_RESULTS_DIR = None
+OUTPUT_DIR = None
+TABLES_DIR = None
+FIGURES_DIR = None
+SUMMARY_DIR = None
 
 
 # =============================================================================
@@ -569,6 +563,44 @@ def run_variable_set_analysis(bvar_results: dict):
 
 def main():
     """Main execution function."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate robustness tables and figures")
+    parser.add_argument("--run-id", default=None, help="Optional run ID to use data/outputs/<run-id>/ inputs/outputs.")
+    parser.add_argument("--output-root", default=None, help="Optional output root (overrides --run-id).")
+    args = parser.parse_args()
+
+    output_root = None
+    if args.output_root:
+        output_root = Path(args.output_root)
+    elif args.run_id:
+        output_root = DATA_DIR / "outputs" / args.run_id
+
+    global FORECAST_RESULTS_DIR, STATISTICAL_TESTS_DIR, STATISTICAL_TESTS_UNIFIED_DIR
+    global FORECAST_PREP_DIR, UNIFIED_RESULTS_DIR, OUTPUT_DIR, TABLES_DIR, FIGURES_DIR, SUMMARY_DIR
+
+    # Academic inputs remain in the canonical data dir.
+    FORECAST_RESULTS_DIR = DATA_DIR / "forecast_results_academic"
+    FORECAST_PREP_DIR = DATA_DIR / "forecast_prep_academic"
+    STATISTICAL_TESTS_DIR = DATA_DIR / "statistical_tests"
+
+    # Unified outputs can be sourced from a run-id bundle when provided.
+    if output_root is not None:
+        STATISTICAL_TESTS_UNIFIED_DIR = output_root / "statistical_tests_unified"
+        UNIFIED_RESULTS_DIR = output_root / "forecast_results_unified"
+        OUTPUT_DIR = output_root / "robustness"
+    else:
+        STATISTICAL_TESTS_UNIFIED_DIR = DATA_DIR / "statistical_tests_unified"
+        UNIFIED_RESULTS_DIR = DATA_DIR / "forecast_results_unified"
+        OUTPUT_DIR = DATA_DIR / "robustness"
+
+    TABLES_DIR = OUTPUT_DIR / "tables"
+    FIGURES_DIR = OUTPUT_DIR / "figures"
+    SUMMARY_DIR = OUTPUT_DIR / "summary"
+
+    for d in [TABLES_DIR, FIGURES_DIR, SUMMARY_DIR]:
+        d.mkdir(parents=True, exist_ok=True)
+
     print("="*70)
     print("PHASE 5 (SPEC 11): ROBUSTNESS TABLES AND ACADEMIC OUTPUT")
     print("="*70)
@@ -792,6 +824,8 @@ def main():
         "uses_unified_tests": STATISTICAL_TESTS_UNIFIED_DIR.exists(),
     }
     write_run_manifest(OUTPUT_DIR, config)
+    if args.run_id and output_root is not None:
+        write_latest_pointer(DATA_DIR / "outputs", args.run_id, output_root)
 
 
 if __name__ == "__main__":

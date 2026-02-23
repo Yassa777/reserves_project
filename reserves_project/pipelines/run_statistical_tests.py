@@ -64,7 +64,7 @@ from reserves_project.eval.encompassing import (
     encompassing_summary,
     optimal_combination_weights,
 )
-from reserves_project.utils.run_manifest import write_run_manifest
+from reserves_project.utils.run_manifest import write_run_manifest, write_latest_pointer
 
 # =============================================================================
 # Configuration
@@ -674,14 +674,30 @@ def main():
     parser.add_argument("--unified-split", default="test")
     parser.add_argument("--min-obs", type=int, default=24)
     parser.add_argument("--output-dir", default=None)
+    parser.add_argument("--run-id", default=None, help="Optional run ID to nest outputs in data/outputs/<run-id>/.")
+    parser.add_argument("--output-root", default=None, help="Optional output root (overrides --run-id).")
     args = parser.parse_args()
 
     global OUTPUT_DIR, FIGURES_DIR, FORECAST_HORIZON
+    global BASELINE_RESULTS_DIR, ACADEMIC_RESULTS_DIR, UNIFIED_RESULTS_DIR
     if args.use_unified:
         FORECAST_HORIZON = args.unified_horizon
 
+    output_root = None
+    if args.output_root:
+        output_root = Path(args.output_root)
+    elif args.run_id:
+        output_root = BASE_DATA_DIR / "outputs" / args.run_id
+
+    if output_root is not None:
+        BASELINE_RESULTS_DIR = output_root / "forecast_results"
+        ACADEMIC_RESULTS_DIR = output_root / "forecast_results_academic"
+        UNIFIED_RESULTS_DIR = output_root / "forecast_results_unified"
+
     if args.output_dir:
         OUTPUT_DIR = Path(args.output_dir)
+    elif output_root is not None:
+        OUTPUT_DIR = output_root / ("statistical_tests_unified" if args.use_unified else "statistical_tests")
     elif args.use_unified:
         OUTPUT_DIR = BASE_DATA_DIR / "statistical_tests_unified"
 
@@ -823,6 +839,8 @@ def main():
         "output_dir": str(OUTPUT_DIR),
     }
     write_run_manifest(OUTPUT_DIR, config)
+    if args.run_id and output_root is not None:
+        write_latest_pointer(BASE_DATA_DIR / "outputs", args.run_id, output_root)
 
 
 if __name__ == "__main__":
