@@ -1,9 +1,0 @@
-source,status,n_rows,n_cols,n_missing,missing_cols,date_range
-historical_reserves.csv,OK,240,3,0,None,2005-01 to 2024-12
-historical_fx.csv,OK,240,2,0,None,2005-01 to 2024-12
-monthly_imports_usd.csv,OK,225,2,0,None,2007-01 to 2025-11
-monthly_exports_usd.csv,OK,224,2,0,None,2007-01 to 2025-11
-remittances_monthly.csv,OK,202,2,0,None,2009-01 to 2025-10
-tourism_earnings_monthly.csv,OK,192,2,0,None,2009-01 to 2024-12
-monetary_aggregates_monthly.csv,OK,355,3,0,None,1995-12 to 2025-09
-D12_reserves.csv,OK,18,2,0,None,2013-11 to 2015-04
