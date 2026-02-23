@@ -1,4 +1,4 @@
-"""Compatibility shim for MS-VARX scenario analysis."""
+"""CLI entrypoint for scenario analysis."""
 
 from reserves_project.pipelines.run_scenario_analysis import main
 

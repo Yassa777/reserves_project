@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-02-23T08:33:04.626004Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "ab167d5cba9aef9c1dcafaea4bac40fd7313ca75",
+  "config_hash": "af4503a5f476e251eee163ebcb753caf716cf15deaf7e1ed7c43e1e374285042",
+  "config": {
+    "varset": "parsimonious",
+    "horizon": 3,
+    "ar_order": 2,
+    "exog_forecast": "naive",
+    "scenarios": [
+      "baseline"
+    ],
+    "endog_cols": [
+      "gross_reserves_usd_m"
+    ],
+    "exog_cols": [
+      "trade_balance_usd_m",
+      "usd_lkr"
+    ],
+    "regime_mode": "free",
+    "regime_path": null,
+    "output_dir": "data/scenario_analysis"
+  },
+  "argv": [
+    "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/reserves_project/pipelines/run_scenario_analysis.py",
+    "--varset",
+    "parsimonious",
+    "--horizon",
+    "3",
+    "--scenarios",
+    "baseline",
+    "--no-figures"
+  ]
+}

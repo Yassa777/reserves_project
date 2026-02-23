@@ -18,6 +18,7 @@ reserves-diagnostics = "reserves_project.cli.diagnostics:main"
 reserves-forecast-prep = "reserves_project.cli.forecast_prep:main"
 reserves-forecast-baselines = "reserves_project.cli.forecast_baselines:main"
 reserves-rolling-backtests = "reserves_project.cli.rolling_backtests:main"
+reserves-scenarios = "reserves_project.cli.scenarios:main"
 
 [tool.setuptools]
 packages = [
@@ -35,4 +36,5 @@ packages = [
   "reserves_project.apps.reserves_diagnostics",
   "reserves_project.apps.reserves_diagnostics.pages",
   "reserves_project.forecasting_models",
+  "reserves_project.scenarios",
 ]

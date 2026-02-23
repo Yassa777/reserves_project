@@ -59,6 +59,8 @@ VARSET_PARSIMONIOUS: Dict[str, Any] = {
     "arima_exog": ["trade_balance_usd_m", "usd_lkr"],
     "vecm_system": ["gross_reserves_usd_m", "trade_balance_usd_m", "usd_lkr"],
     "var_system": ["gross_reserves_usd_m", "trade_balance_usd_m", "usd_lkr"],
+    "scenario_endog": ["gross_reserves_usd_m"],
+    "scenario_exog": ["trade_balance_usd_m", "usd_lkr"],
     "description": "Minimal set: net trade + exchange rate",
     "economic_rationale": (
         "Trade balance captures primary current account driver. "
@@ -84,6 +86,8 @@ VARSET_BOP: Dict[str, Any] = {
         "imports_usd_m",
         "remittances_usd_m",
     ],
+    "scenario_endog": ["gross_reserves_usd_m"],
+    "scenario_exog": ["exports_usd_m", "imports_usd_m", "remittances_usd_m", "tourism_usd_m"],
     "description": "Current account flow decomposition",
     "economic_rationale": (
         "Disaggregated flows allow modeling differential dynamics. "
@@ -98,6 +102,8 @@ VARSET_MONETARY: Dict[str, Any] = {
     "arima_exog": ["usd_lkr", "m2_usd_m"],
     "vecm_system": ["gross_reserves_usd_m", "usd_lkr", "m2_usd_m"],
     "var_system": ["gross_reserves_usd_m", "usd_lkr", "m2_usd_m"],
+    "scenario_endog": ["gross_reserves_usd_m"],
+    "scenario_exog": ["usd_lkr", "m2_usd_m"],
     "description": "Monetary policy and exchange rate intervention",
     "economic_rationale": (
         "CBSL intervenes via USD sales/purchases affecting reserves. "
@@ -123,6 +129,8 @@ VARSET_PCA: Dict[str, Any] = {
     "arima_exog": ["PC1", "PC2", "PC3"],
     "vecm_system": ["gross_reserves_usd_m", "PC1", "PC2", "PC3"],
     "var_system": ["gross_reserves_usd_m", "PC1", "PC2", "PC3"],
+    "scenario_endog": ["gross_reserves_usd_m"],
+    "scenario_exog": ["PC1", "PC2", "PC3"],
     "description": "Principal components of all macro variables",
     "economic_rationale": (
         "Data-driven dimensionality reduction captures common factors. "
@@ -160,6 +168,17 @@ VARSET_FULL: Dict[str, Any] = {
         "remittances_usd_m",
         "usd_lkr",
         "m2_usd_m",
+    ],
+    "scenario_endog": ["gross_reserves_usd_m"],
+    "scenario_exog": [
+        "exports_usd_m",
+        "imports_usd_m",
+        "remittances_usd_m",
+        "tourism_usd_m",
+        "usd_lkr",
+        "m2_usd_m",
+        "cse_net_usd_m",
+        "trade_balance_usd_m",
     ],
     "description": "All available variables (overfitting benchmark)",
     "economic_rationale": (

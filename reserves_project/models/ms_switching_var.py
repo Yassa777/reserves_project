@@ -198,6 +198,8 @@ class MarkovSwitchingVAR:
         steps: int,
         exog_future: np.ndarray | None = None,
         regime_probs: np.ndarray | None = None,
+        lock_regime: bool = False,
+        regime_path: np.ndarray | None = None,
     ) -> np.ndarray:
         if exog_future is None:
             exog_future = np.zeros((steps, 0))
@@ -209,11 +211,24 @@ class MarkovSwitchingVAR:
         k = history.shape[1]
         r = self.n_regimes
 
+        if regime_path is not None and len(regime_path) < steps:
+            raise ValueError("regime_path length must be >= forecast steps")
+
         if regime_probs is None:
+            regime_probs = np.full(r, 1.0 / r)
+        regime_probs = np.asarray(regime_probs, dtype=float)
+        if regime_probs.ndim != 1 or regime_probs.shape[0] != r:
             regime_probs = np.full(r, 1.0 / r)
 
         forecasts = []
         for h in range(steps):
+            if regime_path is not None:
+                step_regime = int(regime_path[h])
+                step_probs = np.zeros(r)
+                step_probs[step_regime] = 1.0
+            else:
+                step_probs = regime_probs
+
             lags = []
             for lag in range(1, p + 1):
                 lags.append(history[-lag])
@@ -226,10 +241,14 @@ class MarkovSwitchingVAR:
                 regime_means.append(mu)
             regime_means = np.vstack(regime_means)
 
-            y_pred = (regime_probs[:, None] * regime_means).sum(axis=0)
+            y_pred = (step_probs[:, None] * regime_means).sum(axis=0)
             forecasts.append(y_pred)
             history = np.vstack([history, y_pred])
 
-            regime_probs = regime_probs @ self.transition_
+            if regime_path is None:
+                if not lock_regime:
+                    regime_probs = step_probs @ self.transition_
+                else:
+                    regime_probs = step_probs
 
         return np.vstack(forecasts)
