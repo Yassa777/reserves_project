@@ -23,3 +23,5 @@
 - Extended statistical tests to support unified rolling-origin outputs (DM/MCS).
 - Added support for tuned XGBoost/LSTM parameter JSONs that store `best_params`.
 - Began full package restructure: added `reserves_project` modules for eval/models/pipelines and wired new console entry points.
+- Added robustness package + pipeline in `reserves_project` and legacy shims for tables/robustness modules.
+- Added run manifests for unified evaluation, statistical tests, robustness tables, and ML tuning outputs.

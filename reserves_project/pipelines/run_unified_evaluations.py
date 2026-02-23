@@ -20,6 +20,7 @@ from reserves_project.eval.unified_evaluator import (
     load_varset_levels,
     summarize_results,
 )
+from reserves_project.utils.run_manifest import write_run_manifest
 
 
 def main():
@@ -97,6 +98,24 @@ def main():
         results.to_csv(output_dir / f"rolling_origin_forecasts_{varset}.csv", index=False)
         summary.to_csv(output_dir / f"rolling_origin_summary_{varset}.csv", index=False)
         print(f"Saved {varset}: {len(results)} forecasts")
+
+    config = {
+        "varsets": varsets,
+        "refit_interval": args.refit_interval,
+        "horizons": horizons,
+        "exog_mode": args.exog_mode,
+        "exog_forecast": args.exog_forecast,
+        "include_ms": args.include_ms,
+        "include_lstm": args.include_lstm,
+        "include_llsv": args.include_llsv,
+        "include_bop": args.include_bop,
+        "exclude_bvar": args.exclude_bvar,
+        "exclude_xgb": args.exclude_xgb,
+        "xgb_params": xgb_params,
+        "lstm_params": lstm_params,
+        "output_dir": str(output_dir),
+    }
+    write_run_manifest(output_dir, config)
 
     print(f"Outputs in {output_dir}")
 

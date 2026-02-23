@@ -24,4 +24,5 @@ packages = [
   "reserves_project.models",
   "reserves_project.eval",
   "reserves_project.pipelines",
+  "reserves_project.robustness",
 ]

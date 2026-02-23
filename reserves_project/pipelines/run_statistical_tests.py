@@ -64,6 +64,7 @@ from reserves_project.eval.encompassing import (
     encompassing_summary,
     optimal_combination_weights,
 )
+from reserves_project.utils.run_manifest import write_run_manifest
 
 # =============================================================================
 # Configuration
@@ -808,6 +809,20 @@ def main():
     print("\n" + "="*60)
     print("Statistical tests complete!")
     print("="*60)
+
+    config = {
+        "use_unified": args.use_unified,
+        "unified_varset": args.unified_varset,
+        "unified_horizon": args.unified_horizon,
+        "unified_split": args.unified_split,
+        "min_obs": args.min_obs,
+        "significance_level": SIGNIFICANCE_LEVEL,
+        "loss_function": DM_LOSS_FUNCTION,
+        "bootstrap_reps": BOOTSTRAP_REPS,
+        "forecast_horizon": FORECAST_HORIZON,
+        "output_dir": str(OUTPUT_DIR),
+    }
+    write_run_manifest(OUTPUT_DIR, config)
 
 
 if __name__ == "__main__":

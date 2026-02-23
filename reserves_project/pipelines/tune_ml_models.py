@@ -31,7 +31,8 @@ except Exception:
 
 from reserves_project.config.paths import PROJECT_ROOT
 from reserves_project.config.varsets import TARGET_VAR, TRAIN_END, VALID_END, VARSET_ORDER, OUTPUT_DIR
-from scripts.academic.ml_models import create_lag_features
+from reserves_project.models.ml_models import create_lag_features
+from reserves_project.utils.run_manifest import write_run_manifest
 
 OUTPUT_BASE = PROJECT_ROOT / "data" / "model_verification" / "ml_tuning"
 OUTPUT_BASE.mkdir(parents=True, exist_ok=True)
@@ -205,6 +206,14 @@ def main():
         with open(out_path, "w") as f:
             json.dump(result, f, indent=2)
         print(f"Saved LSTM tuning: {out_path}")
+
+    config = {
+        "varset": args.varset,
+        "skip_xgb": args.skip_xgb,
+        "skip_lstm": args.skip_lstm,
+        "output_dir": str(OUTPUT_BASE),
+    }
+    write_run_manifest(OUTPUT_BASE, config)
 
 
 if __name__ == "__main__":

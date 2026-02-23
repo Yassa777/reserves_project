@@ -6,6 +6,7 @@ Sri Lanka reserve level forecasting with comprehensive diagnostic framework.
 
 ```
 reserves_project/
+├── reserves_project/              # Core Python package (pip/console entry points)
 ├── apps/                           # Streamlit dashboards
 │   ├── run_diagnostics.py          # Modular Streamlit diagnostics app (Phase 1-9)
 │   ├── app_reserves_diagnostics.py # Monolithic diagnostics app
@@ -67,9 +68,26 @@ reserves_project/
     └── complete_data_dictionary.md # Variable definitions
 ```
 
+Note: Core logic is now in the `reserves_project/` package. Legacy `scripts/` remain as thin shims for backward compatibility.
+
 ## Quick Start
 
 ```bash
+# Install editable package (for console scripts)
+pip install -e .
+
+# Unified rolling-origin evaluation
+reserves-unified --exog-mode forecast --exog-forecast naive --include-ms --include-lstm --include-llsv --include-bop
+
+# Statistical tests (DM/MCS) on unified outputs
+reserves-stat-tests --use-unified --unified-varset parsimonious --unified-horizon 1 --unified-split test
+
+# Robustness tables
+reserves-tables
+
+# Tune ML models
+reserves-tune-ml --varset parsimonious
+
 # Run diagnostics
 cd reserves_project
 python scripts/run_diagnostics.py
