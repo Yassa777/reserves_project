@@ -25,3 +25,5 @@
 - Began full package restructure: added `reserves_project` modules for eval/models/pipelines and wired new console entry points.
 - Added robustness package + pipeline in `reserves_project` and legacy shims for tables/robustness modules.
 - Added run manifests for unified evaluation, statistical tests, robustness tables, and ML tuning outputs.
+- Migrated diagnostics + forecasting prep into `reserves_project` packages with console scripts and shims.
+- Migrated Streamlit apps into `reserves_project.apps` and replaced top-level apps with shims.

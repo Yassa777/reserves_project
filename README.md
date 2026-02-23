@@ -95,6 +95,10 @@ python scripts/run_diagnostics.py
 # Build forecasting-ready datasets (ARIMA, VECM, MS-VAR, MS-VECM)
 python scripts/prepare_forecasting_data.py
 
+# (New) Diagnostics + forecasting prep via console scripts
+reserves-diagnostics
+reserves-forecast-prep --varset baseline
+
 # Run baseline forecasting models (ARIMA, VECM, regime proxies)
 python scripts/run_forecasting_models.py
 
