@@ -1,0 +1,55 @@
+{
+  "variable_set": "full",
+  "description": "All available variables (overfitting benchmark)",
+  "economic_rationale": "Kitchen sink model to benchmark overfitting. Should perform worse than parsimonious sets out-of-sample. Useful for assessing value of variable selection.",
+  "target": "gross_reserves_usd_m",
+  "arima_exog": [
+    "exports_usd_m",
+    "imports_usd_m",
+    "remittances_usd_m",
+    "tourism_usd_m",
+    "usd_lkr",
+    "m2_usd_m",
+    "cse_net_usd_m",
+    "trade_balance_usd_m"
+  ],
+  "vecm_system": [
+    "gross_reserves_usd_m",
+    "exports_usd_m",
+    "imports_usd_m",
+    "remittances_usd_m",
+    "usd_lkr",
+    "m2_usd_m",
+    "trade_balance_usd_m"
+  ],
+  "var_system": [
+    "gross_reserves_usd_m",
+    "exports_usd_m",
+    "imports_usd_m",
+    "remittances_usd_m",
+    "usd_lkr",
+    "m2_usd_m"
+  ],
+  "n_observations": 138,
+  "date_range": [
+    "2012-01-01",
+    "2025-03-01"
+  ],
+  "train_obs": 96,
+  "valid_obs": 27,
+  "test_obs": 15,
+  "train_end": "2019-12-01",
+  "valid_end": "2022-12-01",
+  "missing_strategy": {
+    "method": "ffill_limit",
+    "limit": 3,
+    "drop_remaining": true
+  },
+  "missing_stats": {
+    "original_missing": 314,
+    "filled": 26,
+    "dropped_rows": 114,
+    "final_obs": 138
+  },
+  "created_at": "2026-02-24T08:34:46.551637"
+}

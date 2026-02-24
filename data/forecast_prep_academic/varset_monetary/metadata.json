@@ -1,0 +1,42 @@
+{
+  "variable_set": "monetary",
+  "description": "Monetary policy and exchange rate intervention",
+  "economic_rationale": "CBSL intervenes via USD sales/purchases affecting reserves. M2 growth signals monetary stance (sterilization capacity). Exchange rate reflects intervention pressure.",
+  "target": "gross_reserves_usd_m",
+  "arima_exog": [
+    "usd_lkr",
+    "m2_usd_m"
+  ],
+  "vecm_system": [
+    "gross_reserves_usd_m",
+    "usd_lkr",
+    "m2_usd_m"
+  ],
+  "var_system": [
+    "gross_reserves_usd_m",
+    "usd_lkr",
+    "m2_usd_m"
+  ],
+  "n_observations": 225,
+  "date_range": [
+    "2005-01-01",
+    "2025-06-01"
+  ],
+  "train_obs": 180,
+  "valid_obs": 27,
+  "test_obs": 18,
+  "train_end": "2019-12-01",
+  "valid_end": "2022-12-01",
+  "missing_strategy": {
+    "method": "ffill_limit",
+    "limit": 3,
+    "drop_remaining": true
+  },
+  "missing_stats": {
+    "original_missing": 35,
+    "filled": 8,
+    "dropped_rows": 27,
+    "final_obs": 225
+  },
+  "created_at": "2026-02-24T08:34:46.529468"
+}

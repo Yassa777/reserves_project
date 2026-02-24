@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-02-24T03:01:22.838840Z",
+  "timestamp": "2026-02-24T03:05:00.858737Z",
   "python": "3.11.8",
   "platform": "macOS-26.2-arm64-arm-64bit",
   "git_commit": "4b8b3c3b282474c4b37150114326c23237144f2b",
-  "config_hash": "2d5a3a2d457e71441f17993c983475103b163c72a59fc25f7c6e4ffd9b526e60",
+  "config_hash": "6f84e9fd0c206f986cfddcec2af7cd8327c20fea740aa6508513ec0edf88dbbf",
   "config": {
-    "varset": "parsimonious",
+    "varset": "bop",
     "horizon": 12,
     "ar_order": 2,
-    "exog_forecast": "naive",
+    "exog_forecast": "arima",
     "scenarios": [
       "baseline",
       "lkr_depreciation_10pct",
@@ -25,21 +25,29 @@
       "gross_reserves_usd_m"
     ],
     "exog_cols": [
-      "trade_balance_usd_m",
-      "usd_lkr"
+      "exports_usd_m",
+      "imports_usd_m",
+      "remittances_usd_m",
+      "tourism_usd_m"
     ],
-    "regime_mode": "free",
+    "regime_mode": "locked",
     "regime_path": null,
-    "output_dir": "data/scenario_analysis"
+    "output_dir": "data/scenario_analysis/bop"
   },
   "argv": [
     "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/reserves_project/pipelines/run_scenario_analysis.py",
     "--varset",
-    "parsimonious",
+    "bop",
     "--horizon",
     "12",
     "--scenarios",
     "all",
+    "--exog-forecast",
+    "arima",
+    "--regime-mode",
+    "locked",
+    "--output-dir",
+    "data/scenario_analysis/bop",
     "--no-figures"
   ]
 }

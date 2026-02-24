@@ -1,0 +1,84 @@
+{
+  "variable_set": "pca",
+  "description": "Principal components of all macro variables",
+  "economic_rationale": "Data-driven dimensionality reduction captures common factors. Standardize all source variables before PCA. Use training sample only for PCA fit to avoid look-ahead bias.",
+  "target": "gross_reserves_usd_m",
+  "arima_exog": [
+    "PC1",
+    "PC2",
+    "PC3"
+  ],
+  "vecm_system": [
+    "gross_reserves_usd_m",
+    "PC1",
+    "PC2",
+    "PC3"
+  ],
+  "var_system": [
+    "gross_reserves_usd_m",
+    "PC1",
+    "PC2",
+    "PC3"
+  ],
+  "n_observations": 130,
+  "date_range": [
+    "2012-01-01",
+    "2024-11-01"
+  ],
+  "train_obs": 95,
+  "valid_obs": 24,
+  "test_obs": 11,
+  "train_end": "2019-12-01",
+  "valid_end": "2022-12-01",
+  "missing_strategy": {
+    "method": "ffill_limit",
+    "limit": 3,
+    "drop_remaining": true
+  },
+  "missing_stats": {
+    "original_missing": 0,
+    "filled": 0,
+    "dropped_rows": 0,
+    "final_obs": 130
+  },
+  "created_at": "2026-02-24T08:34:46.544025",
+  "pca": {
+    "source_vars": [
+      "exports_usd_m",
+      "imports_usd_m",
+      "remittances_usd_m",
+      "tourism_usd_m",
+      "usd_lkr",
+      "m2_usd_m",
+      "cse_net_usd_m",
+      "trade_balance_usd_m"
+    ],
+    "n_components": 3,
+    "variance_explained": [
+      0.46080535957626395,
+      0.2074536303940521,
+      0.1264739310707444
+    ],
+    "cumulative_variance_explained": 0.7947329210410605,
+    "interpretation": [
+      {
+        "component": "PC1",
+        "variance_explained_pct": 46.080535957626395,
+        "top_loadings": "m2_usd_m(+0.47), tourism_usd_m(+0.44), usd_lkr(+0.42), imports_usd_m(+0.37)",
+        "interpretation": "Trade scale factor"
+      },
+      {
+        "component": "PC2",
+        "variance_explained_pct": 20.74536303940521,
+        "top_loadings": "trade_balance_usd_m(+0.69), imports_usd_m(-0.48), cse_net_usd_m(-0.33)",
+        "interpretation": "Trade balance factor"
+      },
+      {
+        "component": "PC3",
+        "variance_explained_pct": 12.64739310707444,
+        "top_loadings": "cse_net_usd_m(+0.66), remittances_usd_m(+0.53), exports_usd_m(+0.37), trade_balance_usd_m(+0.31)",
+        "interpretation": "Capital flows"
+      }
+    ]
+  }
+}

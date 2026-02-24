@@ -1,2 +1,6 @@
 variable_set,n_arima_exog,n_vecm_vars,n_var_vars,total_obs,train_obs,valid_obs,test_obs,date_start,date_end
 parsimonious,2,3,3,228,156,36,36,2007-01-01,2025-12-01
+bop,4,5,4,195,132,36,27,2009-01-01,2025-03-01
+monetary,2,3,3,225,180,27,18,2005-01-01,2025-06-01
+pca,3,4,4,130,95,24,11,2012-01-01,2024-11-01
+full,8,7,6,138,96,27,15,2012-01-01,2025-03-01

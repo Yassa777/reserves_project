@@ -1,0 +1,4 @@
+component,variance_explained_pct,top_loadings,interpretation
+PC1,46.080535957626395,"m2_usd_m(+0.47), tourism_usd_m(+0.44), usd_lkr(+0.42), imports_usd_m(+0.37)",Trade scale factor
+PC2,20.74536303940521,"trade_balance_usd_m(+0.69), imports_usd_m(-0.48), cse_net_usd_m(-0.33)",Trade balance factor
+PC3,12.64739310707444,"cse_net_usd_m(+0.66), remittances_usd_m(+0.53), exports_usd_m(+0.37), trade_balance_usd_m(+0.31)",Capital flows

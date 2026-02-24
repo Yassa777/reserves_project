@@ -1,0 +1,47 @@
+{
+  "variable_set": "bop",
+  "description": "Current account flow decomposition",
+  "economic_rationale": "Disaggregated flows allow modeling differential dynamics. Tourism and remittances are major Sri Lankan inflows. Excludes exchange rate to avoid endogeneity concerns in BoP identity.",
+  "target": "gross_reserves_usd_m",
+  "arima_exog": [
+    "exports_usd_m",
+    "imports_usd_m",
+    "remittances_usd_m",
+    "tourism_usd_m"
+  ],
+  "vecm_system": [
+    "gross_reserves_usd_m",
+    "exports_usd_m",
+    "imports_usd_m",
+    "remittances_usd_m",
+    "tourism_usd_m"
+  ],
+  "var_system": [
+    "gross_reserves_usd_m",
+    "exports_usd_m",
+    "imports_usd_m",
+    "remittances_usd_m"
+  ],
+  "n_observations": 195,
+  "date_range": [
+    "2009-01-01",
+    "2025-03-01"
+  ],
+  "train_obs": 132,
+  "valid_obs": 36,
+  "test_obs": 27,
+  "train_end": "2019-12-01",
+  "valid_end": "2022-12-01",
+  "missing_strategy": {
+    "method": "ffill_limit",
+    "limit": 3,
+    "drop_remaining": true
+  },
+  "missing_stats": {
+    "original_missing": 165,
+    "filled": 12,
+    "dropped_rows": 57,
+    "final_obs": 195
+  },
+  "created_at": "2026-02-24T08:34:46.523604"
+}
