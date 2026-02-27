@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-02-26T03:43:44.931312Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "3f090fdcd7db6d45df9b47054b8c14cc9bf057779673e3a9dace3f4200b11a4f",
+  "config": {
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/diagnostics",
+    "n_obs": 252,
+    "variables_tested": [
+      "gross_reserves_usd_m",
+      "net_usable_reserves_usd_m",
+      "exports_usd_m",
+      "imports_usd_m",
+      "remittances_usd_m",
+      "tourism_usd_m",
+      "cse_net_usd_m",
+      "usd_lkr",
+      "m2_usd_m",
+      "trade_balance_usd_m",
+      "reserve_change_usd_m"
+    ]
+  },
+  "argv": [
+    "/opt/anaconda3/bin/slreserves",
+    "diagnostics"
+  ]
+}

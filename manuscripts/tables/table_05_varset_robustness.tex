@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Variable Set Robustness: RMSE at $h=1$ Across Specifications}
+\label{tab:varset_robust}
+\begin{tabular}{lccccccc}
+\toprule
+Model & Parsim. & BoP & Monet. & PCA & Full & Avg Rank & CV \\
+\midrule
+XGBoost & \textbf{640.6} & \textbf{886.1} & \textbf{307.1} & \textbf{648.0} & \textbf{387.9} & 1.0 & 0.402 \\
+Naive & 1178.9 & 1350.8 & 1297.8 & 1295.8 & 1297.8 & 2.6 & 0.049 \\
+ARIMA & 1170.4 & 1249.9 & 2334.7 & 1341.5 & 2195.4 & 3.0 & 0.337 \\
+BVAR & 1214.9 & 1361.5 & 2176.5 & 1483.2 & 567.4 & 3.8 & 0.424 \\
+VECM & 1194.5 & 1556.3 & 5782.7 & 1475.0 & 5275.4 & 4.6 & 0.742 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+CV = coefficient of variation across variable sets (lower = more robust). 
+Bold indicates best in each specification.
+\end{table}

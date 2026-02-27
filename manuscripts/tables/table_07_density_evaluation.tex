@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Density Forecast Evaluation: Parsimonious Specification, $h=1$}
+\label{tab:density}
+\begin{tabular}{lcccc}
+\toprule
+Model & CRPS & Log Score & Coverage$_{80}$ (\%) & Coverage$_{95}$ (\%) \\
+\midrule
+XGB-Quantile & \textbf{241.0} & -- & 72.2 & 97.2 \\
+XGBoost & 466.4 & -928.95 & 2.8 & 5.6 \\
+ARIMA & 734.2 & -10.12 & 41.7 & 50.0 \\
+Naive & 761.5 & -9.88 & 44.4 & 52.8 \\
+VECM & 782.4 & -10.30 & 36.1 & 52.8 \\
+BVAR & 792.1 & -10.18 & 38.9 & 50.0 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+Log Score = average log predictive density (higher is better); 
+Coverage$_{80}$ and Coverage$_{95}$ = empirical coverage rates of 80\% and 95\% 
+prediction intervals (nominal values in subscript). Models without probabilistic 
+output are marked with dashes.
+\end{table}

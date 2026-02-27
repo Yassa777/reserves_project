@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-02-26T09:20:01.713402Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "854c26396b11bc1f96905896453c6a0b51a3bf056c9e9856288f6723e578ef51",
+  "config": {
+    "disentangling_dir": "data/disentangling",
+    "regime_dir": "data/regime_characterization",
+    "irf_dir": "data/msvar_irf",
+    "information_loss_dir": "data/information_loss",
+    "output_dir": "data/mechanism_synthesis",
+    "n_synthesis_rows": 5,
+    "n_detail_rows": 15,
+    "missing_mechanism_values": 0,
+    "missing_linked_gain_values": 0
+  },
+  "argv": [
+    "reserves-mechanism-synthesis",
+    "--disentangling-dir=data/disentangling",
+    "--regime-dir=data/regime_characterization",
+    "--irf-dir=data/msvar_irf",
+    "--information-loss-dir=data/information_loss",
+    "--output-dir=data/mechanism_synthesis"
+  ]
+}

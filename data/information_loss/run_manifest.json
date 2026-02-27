@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-02-26T09:19:52.912523Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "596834ef5aa4955e06e0321a94bef3fd158f87098b63c00dc2be2d58399268c0",
+  "config": {
+    "aggregated_varset": "parsimonious",
+    "disaggregated_varset": "bop",
+    "models_requested": null,
+    "models_tested": [
+      "ARIMA",
+      "BVAR",
+      "MS-VAR",
+      "MS-VECM",
+      "Naive",
+      "VECM",
+      "XGBoost"
+    ],
+    "horizon": 1,
+    "split": "test",
+    "loss": "squared",
+    "segments": [
+      "all",
+      "crisis",
+      "tranquil"
+    ],
+    "min_obs_per_model": 12,
+    "component_signs": {
+      "exports_usd_m": 1.0,
+      "imports_usd_m": -1.0,
+      "remittances_usd_m": 1.0,
+      "tourism_usd_m": 1.0,
+      "cse_net_usd_m": 1.0
+    },
+    "n_aligned_rows": 196,
+    "output_dir": "data/information_loss"
+  },
+  "argv": [
+    "reserves-information-loss",
+    "--aggregated-varset=parsimonious",
+    "--disaggregated-varset=bop",
+    "--horizon=1",
+    "--split=test",
+    "--loss=squared",
+    "--segments=all,crisis,tranquil",
+    "--min-obs-per-model=12",
+    "--input-dir=data/forecast_results_unified",
+    "--output-dir=data/information_loss"
+  ]
+}

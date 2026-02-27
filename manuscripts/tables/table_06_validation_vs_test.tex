@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Forecast Performance: Crisis Validation vs.\ Post-Default Test Period}
+\label{tab:val_vs_test}
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{Validation (2020--2022)} & \multicolumn{3}{c}{Test (2023--2025)} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+Model & RMSE & MAE & MAPE & RMSE & MAE & MAPE \\
+\midrule
+XGBoost & 1183.5 & 1037.3 & 37.82 & 640.6 & 475.7 & 11.82 \\
+XGB-Quantile & 1055.3 & 884.8 & 32.81 & 655.5 & 521.8 & 12.25 \\
+ARIMA & 1986.3 & 1723.7 & 70.36 & 1170.4 & 896.2 & 21.61 \\
+Naive & 1328.1 & 1029.3 & 35.69 & 1178.9 & 935.9 & 20.47 \\
+VECM & 1532.2 & 1289.6 & 46.57 & 1194.5 & 956.8 & 21.64 \\
+BVAR & 1412.7 & 1128.9 & 39.59 & 1214.9 & 964.4 & 21.41 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+Validation period coincides with the Sri Lankan economic crisis and sovereign default (April 2022). 
+Test period covers the post-default recovery under the IMF Extended Fund Facility.
+\end{table}

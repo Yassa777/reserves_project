@@ -1,0 +1,36 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Head-to-Head: Parsimonious vs.\ BoP vs.\ Monetary (RMSE, Test Period)}
+\label{tab:head_to_head}
+\begin{tabular}{llcccc}
+\toprule
+Model & Var.\ Set & $h=1$ & $h=3$ & $h=6$ & $h=12$ \\
+\midrule
+XGBoost & Parsim. & 640.6 & 1281.7 & 1887.6 & 2664.2 \\
+ & BoP & 886.1 & 1376.1 & 1869.4 & 2679.0 \\
+ & Monet. & 307.1 & 475.7 & 593.8 & 670.5 \\
+\addlinespace
+ARIMA & Parsim. & 1170.4 & 1561.6 & 2453.0 & 3444.6 \\
+ & BoP & 1249.9 & 1463.9 & 1834.0 & 2448.6 \\
+ & Monet. & 2334.7 & 2981.0 & 2010.1 & 1784.4 \\
+\addlinespace
+Naive & Parsim. & 1178.9 & 1393.2 & 1737.4 & 2373.7 \\
+ & BoP & 1350.8 & 1599.9 & 1914.3 & 2541.6 \\
+ & Monet. & 1297.8 & 1483.5 & 1623.3 & 1579.5 \\
+\addlinespace
+VECM & Parsim. & 1194.5 & 1404.6 & 1751.5 & 2398.4 \\
+ & BoP & 1556.3 & 1601.3 & 1921.3 & 2650.5 \\
+ & Monet. & 5782.7 & 3707.1 & 2702.2 & 3255.8 \\
+\addlinespace
+BVAR & Parsim. & 1214.9 & 1438.0 & 1793.5 & 2488.9 \\
+ & BoP & 1361.5 & 1597.3 & 1888.6 & 2487.1 \\
+ & Monet. & 2176.5 & 2331.6 & 2485.1 & 2351.1 \\
+\addlinespace
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+primary variable set specifications at all forecast horizons.
+\end{table}

@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "generated_at": "2026-02-26T14:59:57.166301",
+    "version": "1.0"
+  },
+  "sample": {
+    "n_models": 7,
+    "n_observations": 36
+  },
+  "models": {
+    "all_models": [
+      "MS-VAR",
+      "MS-VECM",
+      "XGBoost",
+      "ARIMA",
+      "Naive",
+      "VECM",
+      "BVAR"
+    ],
+    "best_by_rmse": "MS-VAR"
+  },
+  "accuracy": {
+    "best_model": "MS-VAR",
+    "best_rmse": 311.7527123873274,
+    "best_mae": 230.34319753015643,
+    "worst_model": "BVAR",
+    "worst_rmse": 1209.0448135381062,
+    "best_vs_worst_improvement_pct": 74.21495804816158,
+    "naive_rmse": 1178.9472483420434,
+    "best_vs_naive_improvement_pct": 73.55668688096554
+  },
+  "statistical_tests": {
+    "mcs_alpha": 0.1,
+    "mcs_members": [
+      "MS-VAR"
+    ],
+    "mcs_size": 1,
+    "n_eliminated": 6,
+    "dm_n_pairs": 21,
+    "dm_significant_10pct": 16,
+    "dm_significant_05pct": 16,
+    "dm_significant_01pct": 15
+  },
+  "robustness": {
+    "subsample": {
+      "most_consistent_model": "Naive",
+      "most_consistent_cv": 0.10826305562178949,
+      "least_consistent_model": "MS-VAR",
+      "least_consistent_cv": 0.31986134858041637,
+      "n_periods": 4
+    },
+    "horizon": {
+      "best_by_horizon": {
+        "h1": "MS-VAR"
+      },
+      "horizons_tested": [
+        1
+      ]
+    },
+    "variable_set": {
+      "most_robust_model": "BoPIdentity",
+      "n_variable_sets": 5,
+      "variable_sets_tested": [
+        "BOP",
+        "Full",
+        "Monetary",
+        "PCA",
+        "Parsimonious"
+      ]
+    }
+  },
+  "combinations": {}
+}

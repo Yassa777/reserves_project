@@ -1,0 +1,28 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Model Confidence Set Results}
+\label{tab:mcs}
+\begin{tabular}{lccc}
+\toprule
+Model & RMSE & MCS p-value & Status \\
+\midrule
+\multicolumn{4}{l}{\textit{Models in 90\% MCS:}} \\
+MS-VAR & 311.8 & -- & Included \\
+\midrule
+\multicolumn{4}{l}{\textit{Eliminated models (order of elimination):}} \\
+BVAR & 1209.0 & 0.000 & Eliminated (1) \\
+VECM & 1194.5 & 0.001 & Eliminated (2) \\
+Naive & 1178.9 & 0.000 & Eliminated (3) \\
+ARIMA & 1170.4 & 0.000 & Eliminated (4) \\
+XGBoost & 640.6 & 0.008 & Eliminated (5) \\
+MS-VECM & 357.7 & 0.017 & Eliminated (6) \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: MCS procedure with $\alpha = 0.1$. 
+Bootstrap replications: 1,000. Models in the MCS are not statistically 
+distinguishable from the best model at the 10\% level.
+\end{tablenotes}
+\end{table}

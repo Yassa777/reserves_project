@@ -1,0 +1,32 @@
+{
+  "aggregated_varset": "parsimonious",
+  "disaggregated_varset": "bop",
+  "models_requested": null,
+  "models_tested": [
+    "ARIMA",
+    "BVAR",
+    "MS-VAR",
+    "MS-VECM",
+    "Naive",
+    "VECM",
+    "XGBoost"
+  ],
+  "horizon": 1,
+  "split": "test",
+  "loss": "squared",
+  "segments": [
+    "all",
+    "crisis",
+    "tranquil"
+  ],
+  "min_obs_per_model": 12,
+  "component_signs": {
+    "exports_usd_m": 1.0,
+    "imports_usd_m": -1.0,
+    "remittances_usd_m": 1.0,
+    "tourism_usd_m": 1.0,
+    "cse_net_usd_m": 1.0
+  },
+  "n_aligned_rows": 196,
+  "output_dir": "data/information_loss"
+}

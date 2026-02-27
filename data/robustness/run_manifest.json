@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-02-26T09:29:57.174171Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "b58d7ff021974c6e378d42d119bed8a34a913c4f49d905f65ad8915c06c24ed6",
+  "config": {
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/robustness",
+    "tables_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/robustness/tables",
+    "figures_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/robustness/figures",
+    "summary_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/robustness/summary",
+    "uses_unified_results": true,
+    "uses_unified_tests": true,
+    "uses_mechanism_synthesis": true
+  },
+  "argv": [
+    "reserves-tables"
+  ]
+}

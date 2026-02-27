@@ -1,0 +1,12 @@
+variable,available,non_null_obs,coverage_pct,std_dev,is_constant,is_usable,status
+gross_reserves_usd_m,True,252,100.0,2105.398297,False,True,ok
+net_usable_reserves_usd_m,True,252,100.0,2403.514169,False,True,ok
+exports_usd_m,True,224,88.9,176.843768,False,True,ok
+imports_usd_m,True,225,89.3,315.821956,False,True,ok
+remittances_usd_m,True,202,80.2,121.831583,False,True,ok
+tourism_usd_m,True,192,76.2,128.028154,False,True,ok
+cse_net_usd_m,True,166,65.9,26.334834,False,True,ok
+usd_lkr,True,252,100.0,76.706922,False,True,ok
+m2_usd_m,True,217,86.1,12527.610974,False,True,ok
+trade_balance_usd_m,True,224,88.9,227.788991,False,True,ok
+reserve_change_usd_m,True,251,99.6,457.677407,False,True,ok

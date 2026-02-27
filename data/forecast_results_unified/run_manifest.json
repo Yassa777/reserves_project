@@ -1,37 +1,45 @@
 {
-  "timestamp": "2026-02-23T08:16:05.955480Z",
+  "timestamp": "2026-02-26T09:25:38.269643Z",
   "python": "3.11.8",
   "platform": "macOS-26.2-arm64-arm-64bit",
-  "git_commit": "032a7ff4b044610b33780595cdb93a77dc18a663",
-  "config_hash": "b1ce2cdab13f349a4c6bfac7ca9daa9f9e74b48991df50e68eef01d794c8a1be",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "0c46a1a9cb2af27512caf29b3879bae54841682058f13ec1057cc92a5670296a",
   "config": {
     "varsets": [
-      "parsimonious"
+      "bop"
     ],
     "refit_interval": 12,
     "horizons": [
-      1,
-      3,
-      6,
-      12
+      1
     ],
     "exog_mode": "forecast",
     "exog_forecast": "naive",
-    "include_ms": false,
+    "include_ms": true,
     "include_lstm": false,
     "include_llsv": false,
     "include_bop": false,
     "exclude_bvar": false,
     "exclude_xgb": false,
-    "include_xgb_quantile": true,
+    "include_xgb_quantile": false,
+    "window_mode": "common_dates",
+    "segments": [
+      "all",
+      "crisis",
+      "tranquil"
+    ],
     "xgb_params": null,
     "lstm_params": null,
     "output_dir": "data/forecast_results_unified"
   },
   "argv": [
-    "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/reserves_project/pipelines/run_unified_evaluations.py",
-    "--varsets",
-    "parsimonious",
-    "--include-xgb-quantile"
+    "reserves-unified",
+    "--varsets=bop",
+    "--horizons=1",
+    "--refit-interval=12",
+    "--exog-mode=forecast",
+    "--exog-forecast=naive",
+    "--window-mode=common_dates",
+    "--segments=all,crisis,tranquil",
+    "--include-ms"
   ]
 }

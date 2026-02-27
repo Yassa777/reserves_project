@@ -1,0 +1,2 @@
+variables,effective_nobs,k_ar_diff,trace_stats,trace_cv_95,maxeig_stats,maxeig_cv_95,rank_trace_5pct,rank_maxeig_5pct,cointegration_detected
+"['gross_reserves_usd_m', 'exports_usd_m', 'imports_usd_m', 'remittances_usd_m', 'usd_lkr']",199,11,"[79.1586, 41.3814, 21.2589, 8.6526, 0.0322]","[69.8189, 47.8545, 29.7961, 15.4943, 3.8415]","[37.7772, 20.1225, 12.6063, 8.6205, 0.0322]","[33.8777, 27.5858, 21.1314, 14.2639, 3.8415]",1,1,True

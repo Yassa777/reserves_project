@@ -5,6 +5,7 @@ from __future__ import annotations
 import pandas as pd
 
 from reserves_project.eval.metrics import compute_metrics, naive_mae_scale
+from reserves_project.eval.leakage_checks import assert_no_future_in_history
 from reserves_project.models.ms_switching_var import MarkovSwitchingVAR
 
 
@@ -36,7 +37,8 @@ def run_ms_vecm_forecast(state_df: pd.DataFrame, level_series: pd.Series, ar_ord
 
     combined = pd.concat([validation, test])
     exog_future = combined[["ect_lag1"]].values if "ect_lag1" in df.columns else None
-    history = df[y_cols].iloc[-ar_order:].values
+    history = train[y_cols].iloc[-ar_order:].values
+    assert_no_future_in_history(train.index, validation.index.min(), context="legacy MS-VECM wrapper")
     forecast = msvar.forecast(history, steps=len(combined), exog_future=exog_future)
     forecast_df = pd.DataFrame(forecast, index=combined.index, columns=y_cols)
 

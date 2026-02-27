@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Symmetric vs.\ Asymmetric Loss: Parsimonious Specification, $h=1$}
+\label{tab:asym_loss}
+\begin{tabular}{lcccc}
+\toprule
+Model & RMSE & RMSE Rank & Policy Loss & Policy Rank \\
+\midrule
+XGBoost & \textbf{640.6} & 1 & \textbf{900.8} & 1 \\
+XGB-Quantile & 655.5 & 2 & 1018.0 & 2 \\
+ARIMA & 1170.4 & 3 & 1785.6 & 3 \\
+Naive & 1178.9 & 4 & 1864.2 & 4 \\
+VECM & 1194.5 & 5 & 1892.3 & 5 \\
+BVAR & 1214.9 & 6 & 1917.2 & 6 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+the asymmetric costs of reserve shortfalls for central bank operations. 
+Rank changes between RMSE and Policy Loss indicate models whose forecast 
+error distribution is skewed toward over- or under-prediction.
+\end{table}

@@ -12,6 +12,12 @@ from .varsets import (
     VARSET_PCA,
     VARSET_FULL,
 )
+from .evaluation_segments import (
+    EVALUATION_SEGMENTS,
+    DEFAULT_SEGMENT_ORDER,
+    normalize_segment_keys,
+    segment_date_mask,
+)
 
 __all__ = [
     "PROJECT_ROOT",
@@ -25,4 +31,8 @@ __all__ = [
     "VARSET_MONETARY",
     "VARSET_PCA",
     "VARSET_FULL",
+    "EVALUATION_SEGMENTS",
+    "DEFAULT_SEGMENT_ORDER",
+    "normalize_segment_keys",
+    "segment_date_mask",
 ]

@@ -1,0 +1,26 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Forecast Accuracy Across Horizons: RMSE (Balance of Payments Specification)}
+\label{tab:horizon_bop}
+\begin{tabular}{lcccc}
+\toprule
+Model & $h=1$ & $h=3$ & $h=6$ & $h=12$ \\
+\midrule
+LSTM & 479.7 & 713.9 & \textbf{1057.3} & \textbf{1742.2} \\
+MS-VAR & \textbf{315.2} & \textbf{679.5} & 1150.7 & 2050.4 \\
+BoPIdentity & 1136.4 & 1006.3 & 1169.6 & 2734.7 \\
+MS-VECM & 323.4 & 842.8 & 1697.0 & 3249.8 \\
+XGBoost & 886.1 & 1376.1 & 1869.4 & 2679.0 \\
+ARIMA & 1249.9 & 1463.9 & 1834.0 & 2448.6 \\
+BVAR & 1361.5 & 1597.3 & 1888.6 & 2487.1 \\
+Naive & 1350.8 & 1599.9 & 1914.3 & 2541.6 \\
+LocalLevelSV & 1410.0 & 1661.9 & 1964.2 & 2569.3 \\
+VECM & 1556.3 & 1601.3 & 1921.3 & 2650.5 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+remittances, tourism. Test period: 2023--2025. Bold indicates best at each horizon.
+\end{table}

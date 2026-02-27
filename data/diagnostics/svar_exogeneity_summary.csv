@@ -1,0 +1,5 @@
+variable,p_value,weakly_exogenous_5pct
+usd_lkr,0.0087,False
+imports_usd_m,0.0018,False
+exports_usd_m,0.1458,True
+gross_reserves_usd_m,0.8657,True

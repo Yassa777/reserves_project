@@ -131,6 +131,7 @@ def run_phase2(df, variables, verbose=True):
         integration_summary.append(
             {
                 "variable": var,
+                "adf_p_value": adf.get("p_value"),
                 "adf_stationary": adf.get("stationary_5pct"),
                 "kpss_stationary": kpss_res.get("stationary_5pct"),
                 "za_stationary": za.get("stationary_5pct"),

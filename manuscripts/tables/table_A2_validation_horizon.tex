@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Validation Period RMSE Across Horizons (Parsimonious Specification)}
+\label{tab:val_horizon}
+\begin{tabular}{lcccc}
+\toprule
+Model & $h=1$ & $h=3$ & $h=6$ & $h=12$ \\
+\midrule
+Naive & 1328.1 & 1707.0 & \textbf{2253.2} & 3580.5 \\
+BVAR & 1412.7 & 1786.4 & 2349.0 & 3761.7 \\
+XGB-Quantile & \textbf{1055.3} & \textbf{1641.1} & 2599.9 & 4362.6 \\
+ARIMA & 1986.3 & 2192.8 & 2332.8 & \textbf{3348.6} \\
+VECM & 1532.2 & 1904.5 & 2486.1 & 3956.4 \\
+XGBoost & 1183.5 & 2073.5 & 2937.0 & 4467.9 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+Bold indicates best at each horizon.
+\end{table}

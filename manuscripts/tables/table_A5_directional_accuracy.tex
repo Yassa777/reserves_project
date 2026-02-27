@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Directional Accuracy: Parsimonious Specification, $h=1$}
+\label{tab:direction}
+\begin{tabular}{lcc}
+\toprule
+Model & Direction Accuracy (\%) & $n$ \\
+\midrule
+ARIMA & \textbf{54.1} & 37 \\
+XGB-Quantile & \textbf{54.1} & 37 \\
+XGBoost & 51.4 & 37 \\
+BVAR & 43.2 & 37 \\
+Naive & 10.8 & 37 \\
+VECM & 10.8 & 37 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+the direction of change in reserves. Bold indicates best performance.
+\end{table}

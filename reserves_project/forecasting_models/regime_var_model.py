@@ -5,6 +5,7 @@ from __future__ import annotations
 import pandas as pd
 
 from reserves_project.eval.metrics import compute_metrics, naive_mae_scale
+from reserves_project.eval.leakage_checks import assert_no_future_in_history
 from reserves_project.models.ms_switching_var import MarkovSwitchingVAR
 
 
@@ -30,7 +31,8 @@ def run_regime_var_forecast(raw_df: pd.DataFrame, regime_df: pd.DataFrame, level
     msvar.fit(y_train, init_states=init_states)
 
     horizon = len(validation) + len(test)
-    history = joined[variables].iloc[-ar_order:].values
+    history = train[variables].iloc[-ar_order:].values
+    assert_no_future_in_history(train.index, validation.index.min(), context="legacy MS-VAR wrapper")
     fc = msvar.forecast(history, steps=horizon)
     fc_index = pd.concat([validation, test]).index
     fc_df = pd.DataFrame(fc, index=fc_index, columns=variables)

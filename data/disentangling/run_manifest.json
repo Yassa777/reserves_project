@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-02-26T09:19:23.913663Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "7cd91e0bf86544351c1a188d7ceedab4fb1df4ad93623e8031d8719a433d8004",
+  "config": {
+    "varsets": [
+      "parsimonious",
+      "bop"
+    ],
+    "models": [
+      "MS-VAR",
+      "XGBoost"
+    ],
+    "horizon": 1,
+    "split": "test",
+    "n_aligned_obs": 28,
+    "bootstrap_reps": 1000,
+    "random_seed": 42,
+    "input_dir": "data/forecast_results_unified",
+    "output_dir": "data/disentangling",
+    "skip_dm": false
+  },
+  "argv": [
+    "reserves-disentangling",
+    "--varsets=parsimonious,bop",
+    "--models=MS-VAR,XGBoost",
+    "--horizon=1",
+    "--split=test",
+    "--input-dir=data/forecast_results_unified",
+    "--output-dir=data/disentangling",
+    "--min-obs=12",
+    "--bootstrap-reps=1000",
+    "--random-seed=42"
+  ]
+}

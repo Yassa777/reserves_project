@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Mean Absolute Scaled Error (MASE) Across Variable Sets, $h=1$}
+\label{tab:mase}
+\begin{tabular}{lcccccc}
+\toprule
+Model & Parsim. & BoP & Monet. & PCA & Full & Mean \\
+\midrule
+XGBoost & \textbf{1.59} & 2.03 & \textbf{0.93} & 1.13 & \textbf{0.70} & 1.28 \\
+MS-VECM & -- & 0.67 & 1.98 & \textbf{0.88} & 1.98 & 1.38 \\
+MS-VAR & -- & \textbf{0.64} & 1.94 & 1.53 & 1.90 & 1.50 \\
+XGB-Quantile & 1.75 & -- & -- & -- & -- & 1.75 \\
+LSTM & -- & 1.21 & 5.20 & 4.15 & 1.58 & 3.04 \\
+BoPIdentity & -- & 2.81 & 4.34 & 2.79 & 2.66 & 3.15 \\
+Naive & 3.14 & 3.47 & 4.34 & 2.79 & 2.73 & 3.29 \\
+BVAR & 3.23 & 3.52 & 7.73 & 3.29 & 1.22 & 3.80 \\
+ARIMA & 3.00 & 3.25 & 8.18 & 2.93 & 4.81 & 4.43 \\
+LocalLevelSV & -- & 3.66 & 6.69 & 3.70 & 4.27 & 4.58 \\
+VECM & 3.21 & 4.10 & 21.14 & 3.26 & 12.12 & 8.77 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+$h=1$ month, test period (2023--2025). Bold indicates best in each specification.
+\end{table}

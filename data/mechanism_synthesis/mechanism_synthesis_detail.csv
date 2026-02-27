@@ -1,0 +1,16 @@
+source,metric,value
+disentangling,architecture_gain_primary_vs_challenger,464.4718369657329
+disentangling,disaggregation_gain_vs_aggregation,-81.40600688511168
+disentangling,interaction_did,173.7876727102909
+information_loss,info_loss_all_rmse_gain_pct,-1.68063892235126
+information_loss,info_loss_crisis_mean_info_loss_potential,0.926265541485676
+information_loss,info_loss_crisis_rmse_gain_pct,-1.6765096436867906
+information_loss,info_loss_crisis_share_significant_10pct,0.1428571428571428
+irf,irf_mean_abs_half_life_delta,9.04
+irf,irf_mean_abs_peak_delta,33.67985694167052
+irf,irf_target_mean_abs_half_life_delta,8.4
+irf,irf_target_mean_abs_peak_delta,97.26627873789653
+regime,regime_duration_spread_months,39.669836386307274
+regime,regime_mean_duration_months,37.40261279728753
+regime,regime_mean_max_probability,0.9968906132718026
+regime,regime_share_max_prob_ge_0_8,1.0

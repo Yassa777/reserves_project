@@ -11,6 +11,7 @@ Tables:
 - Table 4: Subsample Robustness
 - Table 5: Horizon Robustness
 - Table 6: Variable Set Robustness
+- Table 8: Split Robustness Axis
 - Appendix Tables A1-A6
 
 Author: Academic Forecasting Pipeline
@@ -610,6 +611,86 @@ class LaTeXTableGenerator:
         latex.append(r'\end{table}')
 
         return '\n'.join(latex)
+
+    def generate_table8_split_robustness(
+        self,
+        split_results: pd.DataFrame,
+        metric: str = "rmse",
+    ) -> str:
+        """
+        Generate Table 8: Train/Validation/Test Split Robustness.
+
+        Parameters
+        ----------
+        split_results : pd.DataFrame
+            Split robustness panel with split_label, model, and RMSE.
+        metric : str
+            Metric column name (default: rmse).
+        """
+        latex = []
+        if split_results is None or split_results.empty:
+            return ""
+
+        df = split_results.copy()
+        df = df.rename(
+            columns={
+                "model": "Model",
+                "split_label": "Split",
+                metric: "RMSE",
+            }
+        )
+        if "rank_within_split_varset" not in df.columns and {"Split", "RMSE"}.issubset(df.columns):
+            df["rank_within_split_varset"] = df.groupby("Split")["RMSE"].rank(method="min")
+
+        pivot = df.pivot_table(index="Model", columns="Split", values="RMSE", aggfunc="mean")
+        if pivot.empty:
+            return ""
+
+        split_cols = list(pivot.columns)
+        if "rank_within_split_varset" in df.columns:
+            rank_stats = (
+                df.groupby("Model")["rank_within_split_varset"]
+                .agg(["mean", "std"])
+                .rename(columns={"mean": "AvgRank", "std": "RankSD"})
+            )
+            pivot = pivot.join(rank_stats, how="left")
+            pivot = pivot.sort_values(["AvgRank", split_cols[0]])
+        else:
+            pivot["AvgRank"] = np.nan
+            pivot["RankSD"] = np.nan
+            pivot = pivot.sort_values(split_cols[0])
+
+        latex.append(r"\begin{table}[htbp]")
+        latex.append(r"\centering")
+        latex.append(f"\\{self.font_size}")
+        latex.append(r"\caption{Split Robustness Axis: RMSE Across Train/Validation/Test Boundaries}")
+        latex.append(r"\label{tab:split_robustness}")
+        n_cols = len(split_cols) + 3
+        latex.append(r"\begin{tabular}{l" + "c" * (n_cols - 1) + "}")
+        latex.append(r"\toprule")
+        header = "Model & " + " & ".join(split_cols) + r" & Avg. Rank & Rank SD \\"
+        latex.append(header)
+        latex.append(r"\midrule")
+
+        best_by_split = {col: pivot[col].min() for col in split_cols}
+        for model in pivot.index:
+            row = [model]
+            for col in split_cols:
+                val = pivot.loc[model, col]
+                row.append(self.format_number(val, decimals=1, bold=(val == best_by_split[col])))
+            row.append(self.format_number(pivot.loc[model, "AvgRank"], decimals=2))
+            row.append(self.format_number(pivot.loc[model, "RankSD"], decimals=2))
+            latex.append(" & ".join(row) + r" \\")
+
+        latex.append(r"\bottomrule")
+        latex.append(r"\end{tabular}")
+        latex.append(r"\begin{tablenotes}")
+        latex.append(r"\small")
+        latex.append(r"\item Notes: Lower Avg. Rank and Rank SD indicate stronger stability across split definitions.")
+        latex.append(r"\item Bold indicates best RMSE within each split specification.")
+        latex.append(r"\end{tablenotes}")
+        latex.append(r"\end{table}")
+        return "\n".join(latex)
 
     def save_table(self, latex_code: str, filename: str) -> Path:
         """Save LaTeX table to file."""

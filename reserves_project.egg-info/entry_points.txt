@@ -1,7 +1,12 @@
 [console_scripts]
 reserves-diagnostics = reserves_project.cli.diagnostics:main
+reserves-disentangling = reserves_project.cli.disentangling:main
 reserves-forecast-baselines = reserves_project.cli.forecast_baselines:main
 reserves-forecast-prep = reserves_project.cli.forecast_prep:main
+reserves-information-loss = reserves_project.cli.information_loss:main
+reserves-mechanism-synthesis = reserves_project.cli.mechanism_synthesis:main
+reserves-msvar-irf = reserves_project.cli.msvar_irf:main
+reserves-regime-characterization = reserves_project.cli.regime_characterization:main
 reserves-rolling-backtests = reserves_project.cli.rolling_backtests:main
 reserves-scenarios = reserves_project.cli.scenarios:main
 reserves-stat-tests = reserves_project.cli.stat_tests:main

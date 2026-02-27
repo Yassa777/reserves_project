@@ -1,0 +1,16 @@
+metric,value
+n_obs,193.0
+mean_max_probability,0.9968906132718026
+median_max_probability,0.9999999645330291
+share_max_prob_ge_0_6,1.0
+share_max_prob_ge_0_7,1.0
+share_max_prob_ge_0_8,1.0
+share_max_prob_ge_0_9,0.9948186528497409
+mean_entropy,0.011861521246704532
+mean_normalized_entropy,0.017112557880019703
+regime_assignment_counts.0,58.0
+regime_assignment_counts.1,135.0
+regime_assignment_shares.0,0.3005181347150259
+regime_assignment_shares.1,0.6994818652849741
+average_regime_probabilities.0,0.30311972817276606
+average_regime_probabilities.1,0.696880271827234

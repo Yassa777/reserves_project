@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-02-26T09:29:21.136236Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "ec672969d66679b50d81b10884a2e26fe6fec365ca786e72ba971618a1afaa26",
+  "config": {
+    "use_unified": true,
+    "unified_varset": "parsimonious",
+    "unified_horizon": 1,
+    "unified_split": "test",
+    "min_obs": 24,
+    "significance_level": 0.1,
+    "loss_function": "squared",
+    "bootstrap_reps": 1000,
+    "forecast_horizon": 1,
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/statistical_tests_unified"
+  },
+  "argv": [
+    "reserves-stat-tests",
+    "--use-unified",
+    "--unified-varset=parsimonious",
+    "--unified-horizon=1",
+    "--unified-split=test"
+  ]
+}

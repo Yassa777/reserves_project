@@ -1,0 +1,15 @@
+feature,importance
+gross_reserves_usd_m_lag3,0.2981782
+gross_reserves_usd_m_ma3,0.2945726
+gross_reserves_usd_m_lag2,0.22546789
+gross_reserves_usd_m_lag1,0.07870349
+gross_reserves_usd_m_lag6,0.021345088
+gross_reserves_usd_m_lag12,0.021259345
+usd_lkr_lag3,0.0108486675
+gross_reserves_usd_m_mom1,0.010694794
+gross_reserves_usd_m_mom3,0.00941633
+usd_lkr_lag1,0.009185524
+gross_reserves_usd_m_std3,0.006919758
+trade_balance_usd_m_lag3,0.0059043304
+gross_reserves_usd_m_ma6,0.004291871
+trade_balance_usd_m_lag1,0.0032120913

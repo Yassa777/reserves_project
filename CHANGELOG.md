@@ -5,6 +5,7 @@
 - Added quantile-based CRPS approximation in unified evaluator with interval coverage from quantile outputs.
 - Added `--include-xgb-quantile` flag to unified evaluator and multi-varset runner.
 - Added MS-VARX scenario analysis pipeline with conditional exogenous paths, regime modes, and outputs.
+- Added ADF p-values to diagnostics integration summary output.
 
 ## 2026-02-19
 - Added a unified rolling-origin evaluator with a common forecast API and exportable summary tables.

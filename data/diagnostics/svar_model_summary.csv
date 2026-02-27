@@ -1,0 +1,2 @@
+variables,effective_nobs,lag_order,converged,a_matrix,impact_matrix,target_variable
+"['usd_lkr', 'imports_usd_m', 'exports_usd_m', 'gross_reserves_usd_m']",222,8,True,"[[1.0, 0.0, 0.0, 0.0], [1.5008, 1.0, 0.0, 0.0], [1.7281, -0.2591, 1.0, 0.0], [3.569, 0.106, 0.2857, 1.0]]","[[1.0, 0.0, 0.0, 0.0], [-1.5008, 1.0, 0.0, -0.0], [-2.1169, 0.2591, 1.0, -0.0], [-2.805, -0.18, -0.2857, 1.0]]",gross_reserves_usd_m

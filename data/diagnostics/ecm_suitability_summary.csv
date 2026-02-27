@@ -1,0 +1,5 @@
+pair,ect_coef,ect_p_value,ecm_viable,effective_nobs
+exports_usd_m -> gross_reserves_usd_m,,,False,224
+imports_usd_m -> gross_reserves_usd_m,,,False,225
+remittances_usd_m -> gross_reserves_usd_m,,,False,202
+usd_lkr -> gross_reserves_usd_m,,,False,252

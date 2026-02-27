@@ -1,0 +1,5 @@
+pair,coint_t_stat,p_value,cointegrated_5pct,effective_nobs
+exports_usd_m -> gross_reserves_usd_m,-2.2508,0.3984,False,224
+imports_usd_m -> gross_reserves_usd_m,-2.9189,0.1308,False,225
+remittances_usd_m -> gross_reserves_usd_m,-1.8534,0.6034,False,202
+usd_lkr -> gross_reserves_usd_m,-2.0753,0.4893,False,252

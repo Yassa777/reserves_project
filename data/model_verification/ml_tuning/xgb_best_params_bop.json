@@ -1,0 +1,11 @@
+{
+  "best_params": {
+    "n_estimators": 300,
+    "max_depth": 4,
+    "learning_rate": 0.1,
+    "subsample": 1.0,
+    "colsample_bytree": 0.8,
+    "random_state": 42
+  },
+  "best_rmse": 894.7051798457574
+}

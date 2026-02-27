@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Forecast Accuracy Across Horizons: RMSE (Parsimonious Specification)}
+\label{tab:horizon}
+\begin{tabular}{lccccc}
+\toprule
+Model & $h=1$ & $h=3$ & $h=6$ & $h=12$ & $h_{12}/h_1$ \\
+\midrule
+XGBoost & \textbf{640.6} & \textbf{1281.7} & 1887.6 & 2664.2 & 4.16 \\
+Naive & 1178.9 & 1393.2 & \textbf{1737.4} & \textbf{2373.7} & 2.01 \\
+VECM & 1194.5 & 1404.6 & 1751.5 & 2398.4 & 2.01 \\
+BVAR & 1214.9 & 1438.0 & 1793.5 & 2488.9 & 2.05 \\
+XGB-Quantile & 655.5 & 1384.5 & 1991.1 & 3095.0 & 4.72 \\
+ARIMA & 1170.4 & 1561.6 & 2453.0 & 3444.6 & 2.94 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+$h_{12}/h_1$ = deterioration ratio from 1-month to 12-month horizon. 
+Bold indicates best performance at each horizon. Test period: 2023--2025.
+\end{table}

@@ -24,6 +24,7 @@ def compile_paper_statistics(
     subsample_results: pd.DataFrame,
     horizon_results: pd.DataFrame,
     varset_results: pd.DataFrame,
+    split_results: pd.DataFrame = None,
     combination_summary: Dict = None
 ) -> Dict[str, Any]:
     """
@@ -45,6 +46,8 @@ def compile_paper_statistics(
         Horizon robustness results
     varset_results : pd.DataFrame
         Variable set robustness results
+    split_results : pd.DataFrame, optional
+        Split robustness results (alternative train/validation/test boundaries)
     combination_summary : dict, optional
         Forecast combination summary
 
@@ -172,12 +175,36 @@ def compile_paper_statistics(
                 pivot = varset_results
 
             cv = pivot.std(axis=1) / pivot.mean(axis=1)
-            most_robust = cv.idxmin()
+            most_robust = cv.dropna().idxmin() if cv.notna().any() else None
 
             stats['robustness']['variable_set'] = {
                 'most_robust_model': most_robust,
                 'n_variable_sets': int(pivot.shape[1]),
                 'variable_sets_tested': pivot.columns.tolist(),
+            }
+
+    # Split robustness
+    if split_results is not None and len(split_results) > 0:
+        if {"split_label", "model", "rmse"}.issubset(split_results.columns):
+            df = split_results.copy()
+            if "rank_within_split_varset" not in df.columns:
+                df["rank_within_split_varset"] = df.groupby("split_label")["rmse"].rank(method="min")
+            grouped = (
+                df.groupby("model", as_index=False)
+                .agg(
+                    mean_rank=("rank_within_split_varset", "mean"),
+                    std_rank=("rank_within_split_varset", "std"),
+                    mean_rmse=("rmse", "mean"),
+                )
+                .sort_values(["mean_rank", "mean_rmse"])
+            )
+            best_model = grouped.iloc[0]["model"] if not grouped.empty else None
+            stats["robustness"]["split_axis"] = {
+                "n_split_specs": int(df["split_label"].nunique()),
+                "most_stable_model": best_model,
+                "mean_rank_of_most_stable": (
+                    float(grouped.iloc[0]["mean_rank"]) if not grouped.empty else None
+                ),
             }
 
     # Combination forecasts
@@ -299,6 +326,14 @@ def generate_statistics_summary(stats: Dict) -> str:
     """
     lines = ['# Key Statistics Summary', '']
 
+    def _fmt_number(value, fmt: str) -> str:
+        if value is None:
+            return 'N/A'
+        try:
+            return format(float(value), fmt)
+        except (TypeError, ValueError):
+            return 'N/A'
+
     # Sample
     if 'sample' in stats:
         lines.append('## Sample')
@@ -311,8 +346,8 @@ def generate_statistics_summary(stats: Dict) -> str:
         acc = stats['accuracy']
         lines.append('## Forecast Accuracy')
         lines.append(f"- Best model: {acc.get('best_model', 'N/A')}")
-        lines.append(f"- Best RMSE: {acc.get('best_rmse', 'N/A'):.1f}")
-        lines.append(f"- Improvement vs Naive: {acc.get('best_vs_naive_improvement_pct', 'N/A'):.1f}%")
+        lines.append(f"- Best RMSE: {_fmt_number(acc.get('best_rmse'), '.1f')}")
+        lines.append(f"- Improvement vs Naive: {_fmt_number(acc.get('best_vs_naive_improvement_pct'), '.1f')}%")
         lines.append('')
 
     # Statistical tests
@@ -333,7 +368,9 @@ def generate_statistics_summary(stats: Dict) -> str:
             lines.append(f"- Most consistent model: {rob['subsample'].get('most_consistent_model', 'N/A')}")
 
         if 'horizon' in rob:
-            lines.append(f"- Deterioration ratio (h12/h1): {rob['horizon'].get('deterioration_ratio', 'N/A'):.2f}")
+            lines.append(
+                f"- Deterioration ratio (h12/h1): {_fmt_number(rob['horizon'].get('deterioration_ratio'), '.2f')}"
+            )
 
         lines.append('')
 

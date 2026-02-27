@@ -64,14 +64,32 @@ class MarkovSwitchingVAR:
         self.cov_: list[np.ndarray] = []
         self.transition_: np.ndarray | None = None
         self.loglik_: float | None = None
+        self.loglik_path_: list[float] = []
+        self.converged_: bool | None = None
+        self.n_iter_: int = 0
         self.smoothed_probs_: np.ndarray | None = None
+        self.init_states_summary_: dict | None = None
 
-    def _initialize_params(self, y: np.ndarray, x: np.ndarray, init_states: np.ndarray | None):
+    def _initialize_params(
+        self,
+        y: np.ndarray,
+        x: np.ndarray,
+        init_states: np.ndarray | None,
+        init_states_provided: bool = False,
+    ):
         t, k = y.shape
         r = self.n_regimes
         if init_states is None:
             init_states = np.zeros(t, dtype=int)
         init_states = init_states[:t]
+
+        counts = {str(i): int(np.sum(init_states == i)) for i in range(r)}
+        self.init_states_summary_ = {
+            "provided": bool(init_states_provided),
+            "n_obs": int(t),
+            "regime_counts": counts,
+            "regime_shares": {k: (v / t if t > 0 else np.nan) for k, v in counts.items()},
+        }
 
         probs = np.zeros((t, r))
         for i in range(r):
@@ -175,22 +193,79 @@ class MarkovSwitchingVAR:
         self.transition_ = trans
 
     def fit(self, y: np.ndarray, exog: np.ndarray | None = None, init_states: np.ndarray | None = None):
+        if self.max_iter < 1:
+            raise ValueError("max_iter must be >= 1 for EM estimation.")
+
         y_target, x = _build_design(y, self.ar_order, exog)
+        init_states_provided = init_states is not None
         if init_states is not None:
             init_states = init_states[self.ar_order :]
-        self._initialize_params(y_target, x, init_states)
+        self._initialize_params(y_target, x, init_states, init_states_provided=init_states_provided)
 
+        self.loglik_path_ = []
         prev_ll = None
-        for _ in range(self.max_iter):
+        converged = False
+        n_iter = 0
+        for iter_idx in range(1, self.max_iter + 1):
             gamma, xi, ll = self._e_step(y_target, x)
+            self.loglik_path_.append(float(ll))
             self._m_step(y_target, x, gamma, xi)
+            n_iter = iter_idx
             if prev_ll is not None and abs(ll - prev_ll) < self.tol:
+                converged = True
                 break
             prev_ll = ll
 
-        self.loglik_ = prev_ll
+        self.loglik_ = float(self.loglik_path_[-1]) if self.loglik_path_ else None
+        self.converged_ = converged
+        self.n_iter_ = int(n_iter)
         self.smoothed_probs_ = gamma
         return self
+
+    def expected_durations(self) -> np.ndarray:
+        """Expected regime durations under the fitted transition matrix."""
+        if self.transition_ is None:
+            raise RuntimeError("Model not fitted; transition matrix unavailable.")
+        diag = np.diag(self.transition_).astype(float)
+        denom = np.clip(1.0 - diag, 1e-12, None)
+        durations = 1.0 / denom
+        durations[diag >= 1.0] = np.inf
+        return durations
+
+    def classification_certainty(self) -> dict:
+        """Summary statistics of regime classification certainty."""
+        if self.smoothed_probs_ is None:
+            raise RuntimeError("Model not fitted; smoothed probabilities unavailable.")
+
+        probs = np.asarray(self.smoothed_probs_, dtype=float)
+        if probs.ndim != 2 or probs.shape[0] == 0:
+            raise RuntimeError("Invalid smoothed probability matrix.")
+
+        n_obs, n_regimes = probs.shape
+        max_probs = probs.max(axis=1)
+        assigned = probs.argmax(axis=1)
+        entropy = -np.sum(probs * np.log(np.clip(probs, 1e-12, 1.0)), axis=1)
+        norm = np.log(n_regimes) if n_regimes > 1 else 1.0
+        entropy_norm = entropy / norm if norm > 0 else np.zeros_like(entropy)
+
+        counts = {str(i): int(np.sum(assigned == i)) for i in range(n_regimes)}
+        shares = {k: (v / n_obs if n_obs > 0 else np.nan) for k, v in counts.items()}
+        avg_probs = {str(i): float(np.mean(probs[:, i])) for i in range(n_regimes)}
+
+        return {
+            "n_obs": int(n_obs),
+            "mean_max_probability": float(np.mean(max_probs)),
+            "median_max_probability": float(np.median(max_probs)),
+            "share_max_prob_ge_0_6": float(np.mean(max_probs >= 0.6)),
+            "share_max_prob_ge_0_7": float(np.mean(max_probs >= 0.7)),
+            "share_max_prob_ge_0_8": float(np.mean(max_probs >= 0.8)),
+            "share_max_prob_ge_0_9": float(np.mean(max_probs >= 0.9)),
+            "mean_entropy": float(np.mean(entropy)),
+            "mean_normalized_entropy": float(np.mean(entropy_norm)),
+            "regime_assignment_counts": counts,
+            "regime_assignment_shares": shares,
+            "average_regime_probabilities": avg_probs,
+        }
 
     def forecast(
         self,

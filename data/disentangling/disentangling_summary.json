@@ -1,0 +1,18 @@
+{
+  "varsets": [
+    "parsimonious",
+    "bop"
+  ],
+  "models": [
+    "MS-VAR",
+    "XGBoost"
+  ],
+  "horizon": 1,
+  "split": "test",
+  "n_aligned_obs": 28,
+  "bootstrap_reps": 1000,
+  "random_seed": 42,
+  "input_dir": "data/forecast_results_unified",
+  "output_dir": "data/disentangling",
+  "skip_dm": false
+}

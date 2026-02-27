@@ -1,0 +1,8 @@
+effect,value,definition,ci_lower,ci_upper,boot_std,n_bootstrap
+architecture_effect_at_parsimonious,377.5780006105874,"RMSE(XGBoost,parsimonious) - RMSE(MS-VAR,parsimonious)",237.81348348915117,503.0280965215239,67.71523516249209,1000
+architecture_effect_at_bop,551.3656733208784,"RMSE(XGBoost,bop) - RMSE(MS-VAR,bop)",362.0184988565369,728.024242854278,92.77808360587044,1000
+architecture_effect_avg,464.4718369657329,Average architecture contrast across varsets,316.061644921517,602.4462653066472,71.836815818796,1000
+information_effect_at_MS-VAR,-5.487829470033773,"RMSE(MS-VAR,bop) - RMSE(MS-VAR,parsimonious)",-63.669785924186336,48.44823529106676,28.452779382118973,1000
+information_effect_at_XGBoost,168.29984324025713,"RMSE(XGBoost,bop) - RMSE(XGBoost,parsimonious)",43.965932383743386,279.88020829708927,60.39268427394458,1000
+information_effect_avg,81.40600688511168,Average information contrast across models,21.159310370260233,130.14971355885362,28.149310041789974,1000
+interaction_did,173.7876727102909,Difference-in-differences interaction term,23.52382990921485,326.4305505662565,75.79010036571071,1000

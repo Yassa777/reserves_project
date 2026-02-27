@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Out-of-Sample Forecast Accuracy: Parsimonious Specification, $h=1$}
+\label{tab:main_accuracy}
+\begin{tabular}{lccccccc}
+\toprule
+Model & RMSE & MAE & MAPE & MASE & Policy Loss & CRPS & $n$ \\
+\midrule
+XGBoost & \textbf{640.6} & \textbf{475.7} & \textbf{11.82} & \textbf{1.59} & \textbf{900.8} & 466.4 & 36 \\
+XGB-Quantile & 655.5 & 521.8 & 12.25 & 1.75 & 1018.0 & 241.0 & 36 \\
+ARIMA & 1170.4 & 896.2 & 21.61 & 3.00 & 1785.6 & 734.2 & 36 \\
+Naive & 1178.9 & 935.9 & 20.47 & 3.14 & 1864.2 & 761.5 & 36 \\
+VECM & 1194.5 & 956.8 & 21.64 & 3.21 & 1892.3 & 782.4 & 36 \\
+BVAR & 1214.9 & 964.4 & 21.41 & 3.23 & 1917.2 & 792.1 & 36 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+MAE = Mean Absolute Error; MAPE = Mean Absolute Percentage Error (\%); 
+MASE = Mean Absolute Scaled Error; Policy Loss = asymmetric loss ($2\times$ 
+penalty for under-prediction); CRPS = Continuous Ranked Probability Score. 
+Bold indicates best performance. Parsimonious set: reserves, trade balance, exchange rate.
+\end{table}

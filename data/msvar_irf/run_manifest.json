@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-02-26T09:19:43.649911Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "a98e1588976cdd58dc1274c9ba34d8724bcbf6b293ccffbe1d5be3956363d286",
+  "config": {
+    "varset": "bop",
+    "n_regimes": 2,
+    "ar_order": 1,
+    "max_horizon": 24,
+    "fit_split": "full",
+    "train_end": "2019-12-01",
+    "valid_end": "2022-12-01",
+    "fit_start": null,
+    "fit_end": null,
+    "difference_irf": false,
+    "output_dir": "data/msvar_irf"
+  },
+  "argv": [
+    "reserves-msvar-irf",
+    "--varset=bop",
+    "--n-regimes=2",
+    "--ar-order=1",
+    "--max-horizon=24",
+    "--fit-split=full",
+    "--train-end=2019-12-01",
+    "--valid-end=2022-12-01",
+    "--output-dir=data/msvar_irf"
+  ],
+  "extra": {
+    "n_obs": 194
+  }
+}

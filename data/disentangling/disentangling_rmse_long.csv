@@ -1,0 +1,5 @@
+model,varset,rmse,n
+MS-VAR,parsimonious,324.9072841871065,28
+MS-VAR,bop,319.4194547170727,28
+XGBoost,parsimonious,702.4852847976939,28
+XGBoost,bop,870.785128037951,28

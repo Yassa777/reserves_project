@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Variable Set Specifications}
+\label{tab:varsets}
+\begin{tabular}{llcl}
+\toprule
+Variable Set & Key Variables & $k$ & Rationale \\
+\midrule
+Parsimonious & Reserves, trade balance, exchange rate & 3 & First-order BoP determinants \\
+BoP & Reserves, exports, imports, remittances, tourism & 5 & Disaggregated current account \\
+Monetary & Reserves, exchange rate, M2 & 3 & Capital flight channel \\
+PCA & Reserves + 3 PCs from 8 indicators & 4 & Dimensionality reduction \\
+Full & All available predictors & 7+ & Upper bound on information \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+$k$ = number of endogenous variables in the VAR system. The BoP set replaces the trade balance
+with separate exports and imports to identify independent shocks. The PCA set extracts three
+principal components from the eight indicators in the Monetary set, fitted on training data
+only to avoid look-ahead bias.
+\end{table}

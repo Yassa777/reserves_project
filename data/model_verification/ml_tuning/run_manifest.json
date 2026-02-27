@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-02-26T09:22:32.826490Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "6b603a3bc0cc6a2ee592dad9304b8efe4d5eb89ac5a9458a14ddb2a0055fac21",
+  "config": {
+    "varset": "bop",
+    "skip_xgb": false,
+    "skip_lstm": true,
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning"
+  },
+  "argv": [
+    "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/reserves_project/pipelines/tune_ml_models.py",
+    "--varset",
+    "bop",
+    "--skip-lstm"
+  ]
+}

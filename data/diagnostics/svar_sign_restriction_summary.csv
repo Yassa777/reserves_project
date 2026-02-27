@@ -1,0 +1,4 @@
+restriction,expected_sign,horizon_0_3_match_ratio,passes_75pct_rule
+usd_lkr shock -> gross_reserves_usd_m,negative,0.5,False
+imports_usd_m shock -> gross_reserves_usd_m,negative,0.25,False
+exports_usd_m shock -> gross_reserves_usd_m,positive,0.25,False

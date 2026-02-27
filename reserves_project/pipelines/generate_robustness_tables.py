@@ -9,7 +9,8 @@ This script:
 2. Computes subsample robustness (pre-crisis, crisis, post-default, COVID)
 3. Computes horizon robustness (h=1,3,6,12)
 4. Computes variable set robustness (5 specifications)
-5. Generates LaTeX tables (Tables 1-6, Appendix A1-A6)
+5. Incorporates mechanism synthesis diagnostics (when available)
+6. Generates LaTeX tables (Tables 1-8, Appendix A1-A6)
 6. Generates publication figures
 7. Compiles paper statistics JSON
 
@@ -80,6 +81,7 @@ STATISTICAL_TESTS_DIR = None
 STATISTICAL_TESTS_UNIFIED_DIR = None
 FORECAST_PREP_DIR = None
 UNIFIED_RESULTS_DIR = None
+MECHANISM_SYNTHESIS_DIR = None
 OUTPUT_DIR = None
 TABLES_DIR = None
 FIGURES_DIR = None
@@ -184,20 +186,97 @@ def load_favar_results():
 
 def load_dma_results():
     """Load DMA/DMS results."""
-    dma_dir = FORECAST_RESULTS_DIR / "dma"
     results = {}
 
-    # Rolling backtest
-    backtest_path = dma_dir / "dma_rolling_backtest.csv"
-    if backtest_path.exists():
-        results['backtest'] = pd.read_csv(backtest_path, parse_dates=['date'])
+    # Prefer unified DMA artifacts when available.
+    unified_candidates = [
+        UNIFIED_RESULTS_DIR / "dma_weights.csv",
+        UNIFIED_RESULTS_DIR / "dma_weights_bop.csv",
+        UNIFIED_RESULTS_DIR / "dma_weights_parsimonious.csv",
+    ]
+    for path in unified_candidates:
+        if path.exists():
+            weights = pd.read_csv(path, parse_dates=["date"])
+            if "horizon" in weights.columns:
+                h1 = weights[weights["horizon"] == 1].copy()
+                if not h1.empty:
+                    weights = h1
+                weights = weights.drop(columns=["horizon"], errors="ignore")
+            drop_cols = {"varset", "split_label", "train_end", "valid_end"}
+            weights = weights.drop(columns=[c for c in weights.columns if c in drop_cols], errors="ignore")
+            results["weights"] = weights
+            break
 
-    # Weights
+    # Attempt to build a DMA backtest panel from unified forecasts.
+    if UNIFIED_RESULTS_DIR.exists():
+        for varset in ["bop", "parsimonious", "monetary", "pca", "full"]:
+            fc_path = UNIFIED_RESULTS_DIR / f"rolling_origin_forecasts_{varset}.csv"
+            if not fc_path.exists():
+                continue
+            df = pd.read_csv(fc_path, parse_dates=["forecast_date"])
+            if df.empty or "model" not in df.columns:
+                continue
+            dma_like = df[
+                (df["horizon"] == 1)
+                & (df["model"].isin(["DMA", "DMS"]))
+            ][["forecast_date", "model", "forecast", "actual", "split"]].copy()
+            if dma_like.empty:
+                continue
+            pivot = dma_like.pivot_table(
+                index="forecast_date",
+                columns="model",
+                values="forecast",
+                aggfunc="mean",
+            ).reset_index()
+            pivot.columns.name = None
+            if "DMA" in pivot.columns:
+                pivot = pivot.rename(columns={"DMA": "dma_forecast"})
+            if "DMS" in pivot.columns:
+                pivot = pivot.rename(columns={"DMS": "dms_forecast"})
+            actual = dma_like.groupby("forecast_date")["actual"].mean()
+            split = dma_like.groupby("forecast_date")["split"].first()
+            pivot["actual"] = pivot["forecast_date"].map(actual)
+            pivot["split"] = pivot["forecast_date"].map(split)
+            pivot = pivot.rename(columns={"forecast_date": "date"})
+            results["backtest"] = pivot
+            break
+
+    # Fall back to legacy academic DMA outputs.
+    dma_dir = FORECAST_RESULTS_DIR / "dma"
+    backtest_path = dma_dir / "dma_rolling_backtest.csv"
+    if "backtest" not in results and backtest_path.exists():
+        results["backtest"] = pd.read_csv(backtest_path, parse_dates=["date"])
+
     weights_path = dma_dir / "dma_weights.csv"
-    if weights_path.exists():
-        results['weights'] = pd.read_csv(weights_path, parse_dates=['date'])
+    if "weights" not in results and weights_path.exists():
+        results["weights"] = pd.read_csv(weights_path, parse_dates=["date"])
 
     return results
+
+
+def load_split_robustness_results():
+    """Load split-robustness outputs from unified evaluation runs."""
+    candidate_dirs = [
+        UNIFIED_RESULTS_DIR,
+        PROJECT_ROOT / "reserves_project" / "data" / "forecast_results_unified",
+        Path.cwd() / "data" / "forecast_results_unified",
+    ]
+    for base in candidate_dirs:
+        if base is None or not base.exists():
+            continue
+        h1_path = base / "split_robustness_h1_test.csv"
+        if h1_path.exists():
+            return pd.read_csv(h1_path)
+        summary_path = base / "split_robustness_summary.csv"
+        if summary_path.exists():
+            df = pd.read_csv(summary_path)
+            if {"split", "horizon"}.issubset(df.columns):
+                df = df[(df["split"] == "test") & (df["horizon"] == 1)].copy()
+                if "segment" in df.columns:
+                    df = df[df["segment"] == "all"].copy()
+                if not df.empty:
+                    return df
+    return None
 
 
 def load_baseline_forecasts():
@@ -226,6 +305,7 @@ def load_unified_results():
     """Load unified rolling-origin summaries and forecasts."""
     summaries = {}
     forecasts = {}
+    segment_summaries = {}
 
     candidate_dirs = [
         UNIFIED_RESULTS_DIR,
@@ -240,18 +320,118 @@ def load_unified_results():
             break
 
     if unified_dir is None:
-        return summaries, forecasts
+        return summaries, segment_summaries, forecasts
 
     for varset in ['parsimonious', 'bop', 'monetary', 'pca', 'full']:
         summary_path = unified_dir / f"rolling_origin_summary_{varset}.csv"
         if summary_path.exists():
             summaries[varset] = pd.read_csv(summary_path)
 
+        summary_segment_path = unified_dir / f"rolling_origin_summary_segments_{varset}.csv"
+        if summary_segment_path.exists():
+            segment_summaries[varset] = pd.read_csv(summary_segment_path)
+        elif summary_path.exists():
+            df = pd.read_csv(summary_path)
+            if "segment" in df.columns:
+                segment_summaries[varset] = df
+
         forecast_path = unified_dir / f"rolling_origin_forecasts_{varset}.csv"
         if forecast_path.exists():
             forecasts[varset] = pd.read_csv(forecast_path, parse_dates=['forecast_date', 'forecast_origin'])
 
-    return summaries, forecasts
+    return summaries, segment_summaries, forecasts
+
+
+def load_mechanism_synthesis_results():
+    """Load mechanism synthesis outputs if available."""
+    candidate_dirs = [
+        MECHANISM_SYNTHESIS_DIR,
+        DATA_DIR / "mechanism_synthesis",
+        PROJECT_ROOT / "reserves_project" / "data" / "mechanism_synthesis",
+        Path.cwd() / "data" / "mechanism_synthesis",
+    ]
+
+    seen = set()
+    for candidate in candidate_dirs:
+        if candidate is None:
+            continue
+        candidate = Path(candidate)
+        if candidate in seen or not candidate.exists():
+            continue
+        seen.add(candidate)
+
+        found = {}
+
+        table_path = candidate / "mechanism_synthesis_table.csv"
+        if table_path.exists():
+            found["table"] = pd.read_csv(table_path)
+
+        detail_path = candidate / "mechanism_synthesis_detail.csv"
+        if detail_path.exists():
+            found["detail"] = pd.read_csv(detail_path)
+
+        diagnostics_path = candidate / "mechanism_synthesis_diagnostics.json"
+        if diagnostics_path.exists():
+            with open(diagnostics_path) as f:
+                found["diagnostics"] = json.load(f)
+
+        if found:
+            found["source_dir"] = candidate
+            return found
+
+    return {}
+
+
+def generate_table7_mechanism_synthesis(
+    mechanism_table: pd.DataFrame,
+    font_size: str = "small",
+) -> str:
+    """Generate Table 7: Mechanism evidence synthesis."""
+    required_cols = {
+        "mechanism_id",
+        "channel",
+        "mechanism_value",
+        "linked_forecast_gain_value",
+        "supports_direction",
+    }
+    if mechanism_table is None or mechanism_table.empty or not required_cols.issubset(mechanism_table.columns):
+        return ""
+
+    df = mechanism_table.copy()
+    df = df.sort_values(["channel", "mechanism_id"]).reset_index(drop=True)
+
+    latex = []
+    latex.append(r"\begin{table}[htbp]")
+    latex.append(r"\centering")
+    latex.append(f"\\{font_size}")
+    latex.append(r"\caption{Mechanism Evidence Synthesis}")
+    latex.append(r"\label{tab:mechanism_synthesis}")
+    latex.append(r"\begin{tabular}{llccc}")
+    latex.append(r"\toprule")
+    latex.append(r"Mechanism & Channel & Mechanism Value & Linked Gain & Supports \\")
+    latex.append(r"\midrule")
+
+    for _, row in df.iterrows():
+        mechanism = str(row["mechanism_id"]).replace("_", r"\_")
+        channel = str(row["channel"]).title()
+        mechanism_value = "--" if pd.isna(row["mechanism_value"]) else f"{float(row['mechanism_value']):.3f}"
+        linked_gain = "--" if pd.isna(row["linked_forecast_gain_value"]) else f"{float(row['linked_forecast_gain_value']):.3f}"
+
+        supports = "--"
+        if pd.notna(row["supports_direction"]):
+            supports = r"$\checkmark$" if bool(row["supports_direction"]) else "No"
+
+        latex.append(f"{mechanism} & {channel} & {mechanism_value} & {linked_gain} & {supports} \\\\")
+
+    latex.append(r"\bottomrule")
+    latex.append(r"\end{tabular}")
+    latex.append(r"\begin{tablenotes}")
+    latex.append(r"\small")
+    latex.append(r"\item Notes: Linked gain corresponds to the associated forecast-improvement metric.")
+    latex.append(r"\item Supports = indicator that both mechanism value and linked gain have positive sign.")
+    latex.append(r"\end{tablenotes}")
+    latex.append(r"\end{table}")
+    return "\n".join(latex)
 
 
 def build_main_accuracy_from_unified(
@@ -260,12 +440,15 @@ def build_main_accuracy_from_unified(
     varset: str = 'parsimonious',
     horizon: int = 1,
     split: str = 'test',
+    segment: str = 'all',
 ) -> pd.DataFrame | None:
     df = summaries.get(varset)
     if df is None or df.empty:
         return None
 
     df = df[(df['horizon'] == horizon) & (df['split'] == split)].copy()
+    if "segment" in df.columns:
+        df = df[df["segment"] == segment]
     if df.empty:
         return None
 
@@ -292,12 +475,15 @@ def build_horizon_results_from_unified(
     summaries: dict,
     varset: str = 'parsimonious',
     split: str = 'test',
+    segment: str = 'all',
 ) -> pd.DataFrame | None:
     df = summaries.get(varset)
     if df is None or df.empty:
         return None
 
     df = df[df['split'] == split].copy()
+    if "segment" in df.columns:
+        df = df[df["segment"] == segment]
     if df.empty:
         return None
 
@@ -313,10 +499,13 @@ def build_varset_results_from_unified(
     summaries: dict,
     horizon: int = 1,
     split: str = 'test',
+    segment: str = 'all',
 ) -> pd.DataFrame | None:
     rows = []
     for varset, df in summaries.items():
         df = df[(df['horizon'] == horizon) & (df['split'] == split)].copy()
+        if "segment" in df.columns:
+            df = df[df["segment"] == segment]
         if df.empty:
             continue
 
@@ -332,6 +521,43 @@ def build_varset_results_from_unified(
     if not rows:
         return None
 
+    return pd.DataFrame(rows)
+
+
+def build_segment_results_from_unified(
+    segment_summaries: dict,
+    horizon: int = 1,
+    split: str = "test",
+) -> pd.DataFrame | None:
+    """Build segment-level robustness panel from unified summaries."""
+    rows = []
+    for varset, df in segment_summaries.items():
+        if df is None or df.empty:
+            continue
+        if "segment" not in df.columns:
+            continue
+
+        subset = df[(df["horizon"] == horizon) & (df["split"] == split)].copy()
+        if subset.empty:
+            continue
+
+        for _, row in subset.iterrows():
+            rows.append(
+                {
+                    "varset": varset,
+                    "segment": row["segment"],
+                    "model": row["model"],
+                    "rmse": row.get("rmse"),
+                    "mae": row.get("mae"),
+                    "mape": row.get("mape"),
+                    "policy_loss": row.get("policy_loss"),
+                    "n": row.get("n"),
+                    "window_mode": row.get("window_mode"),
+                }
+            )
+
+    if not rows:
+        return None
     return pd.DataFrame(rows)
 
 
@@ -355,6 +581,50 @@ def build_subsample_results_from_unified(
     analyzer = SubsampleAnalyzer()
     results = analyzer.analyze(wide.reset_index().rename(columns={'forecast_date': 'date'}), actuals, date_col='date')
     return results
+
+
+def build_split_robustness_from_unified(
+    split_results: pd.DataFrame | None,
+    varset: str | None = "bop",
+) -> pd.DataFrame | None:
+    """Build split-robustness panel for table generation."""
+    if split_results is None or split_results.empty:
+        return None
+
+    df = split_results.copy()
+    if "varset" in df.columns and varset:
+        focused = df[df["varset"] == varset].copy()
+        if not focused.empty:
+            df = focused
+        else:
+            # Fall back to the most available variable set for robustness table generation.
+            counts = df["varset"].value_counts()
+            if not counts.empty:
+                df = df[df["varset"] == counts.index[0]].copy()
+    if "segment" in df.columns:
+        df = df[df["segment"] == "all"].copy()
+    if {"split", "horizon"}.issubset(df.columns):
+        df = df[(df["split"] == "test") & (df["horizon"] == 1)].copy()
+    if df.empty:
+        return None
+
+    # Ensure split-wise ranks are present.
+    if "rank_within_split_varset" not in df.columns and {"split_label", "rmse"}.issubset(df.columns):
+        df["rank_within_split_varset"] = df.groupby("split_label")["rmse"].rank(method="min")
+
+    keep_cols = [
+        "split_label",
+        "train_end",
+        "valid_end",
+        "varset",
+        "model",
+        "rmse",
+        "mae",
+        "mape",
+        "rank_within_split_varset",
+    ]
+    present = [c for c in keep_cols if c in df.columns]
+    return df[present].copy()
 
 
 # =============================================================================
@@ -577,7 +847,8 @@ def main():
         output_root = DATA_DIR / "outputs" / args.run_id
 
     global FORECAST_RESULTS_DIR, STATISTICAL_TESTS_DIR, STATISTICAL_TESTS_UNIFIED_DIR
-    global FORECAST_PREP_DIR, UNIFIED_RESULTS_DIR, OUTPUT_DIR, TABLES_DIR, FIGURES_DIR, SUMMARY_DIR
+    global FORECAST_PREP_DIR, UNIFIED_RESULTS_DIR, MECHANISM_SYNTHESIS_DIR
+    global OUTPUT_DIR, TABLES_DIR, FIGURES_DIR, SUMMARY_DIR
 
     # Academic inputs remain in the canonical data dir.
     FORECAST_RESULTS_DIR = DATA_DIR / "forecast_results_academic"
@@ -588,10 +859,12 @@ def main():
     if output_root is not None:
         STATISTICAL_TESTS_UNIFIED_DIR = output_root / "statistical_tests_unified"
         UNIFIED_RESULTS_DIR = output_root / "forecast_results_unified"
+        MECHANISM_SYNTHESIS_DIR = output_root / "mechanism_synthesis"
         OUTPUT_DIR = output_root / "robustness"
     else:
         STATISTICAL_TESTS_UNIFIED_DIR = DATA_DIR / "statistical_tests_unified"
         UNIFIED_RESULTS_DIR = DATA_DIR / "forecast_results_unified"
+        MECHANISM_SYNTHESIS_DIR = DATA_DIR / "mechanism_synthesis"
         OUTPUT_DIR = DATA_DIR / "robustness"
 
     TABLES_DIR = OUTPUT_DIR / "tables"
@@ -633,15 +906,29 @@ def main():
     print(f"Loaded DMA results: {list(dma_results.keys())}")
 
     # Unified rolling-origin results
-    unified_summaries, unified_forecasts = load_unified_results()
+    unified_summaries, unified_segment_summaries, unified_forecasts = load_unified_results()
     if unified_summaries:
         print(f"Loaded unified summaries: {list(unified_summaries.keys())}")
+    if unified_segment_summaries:
+        print(f"Loaded unified segment summaries: {list(unified_segment_summaries.keys())}")
     if unified_forecasts:
         print(f"Loaded unified forecasts: {list(unified_forecasts.keys())}")
+    split_robustness_raw = load_split_robustness_results()
+    if split_robustness_raw is not None and len(split_robustness_raw) > 0:
+        n_splits = split_robustness_raw["split_label"].nunique() if "split_label" in split_robustness_raw.columns else "unknown"
+        print(f"Loaded split robustness rows: {len(split_robustness_raw)} (splits={n_splits})")
 
     # Baseline forecasts
     baseline_results = load_baseline_forecasts()
     print(f"Loaded baseline models: {list(baseline_results.keys())}")
+
+    # Mechanism synthesis outputs
+    mechanism_results = load_mechanism_synthesis_results()
+    if mechanism_results:
+        source_dir = mechanism_results.get("source_dir")
+        print(f"Loaded mechanism synthesis artifacts from: {source_dir}")
+    else:
+        print("Loaded mechanism synthesis artifacts: none")
 
     # Run robustness analyses
     subsample_results = None
@@ -664,6 +951,33 @@ def main():
         varset_results = build_varset_results_from_unified(unified_summaries)
     if varset_results is None:
         varset_results = run_variable_set_analysis(bvar_results)
+
+    segment_results = None
+    if unified_segment_summaries:
+        segment_results = build_segment_results_from_unified(unified_segment_summaries)
+    if segment_results is not None and len(segment_results) > 0:
+        segment_path = SUMMARY_DIR / "segment_robustness_summary.csv"
+        segment_results.to_csv(segment_path, index=False)
+        print(f"Saved segment summary: {segment_path}")
+
+        best_by_segment = (
+            segment_results.sort_values(["segment", "rmse"])
+            .groupby("segment", as_index=False)
+            .first()[["segment", "model", "rmse", "varset"]]
+            .rename(columns={"model": "best_model", "rmse": "best_rmse", "varset": "best_varset"})
+        )
+        best_path = SUMMARY_DIR / "segment_best_models.csv"
+        best_by_segment.to_csv(best_path, index=False)
+        print(f"Saved segment best-model summary: {best_path}")
+
+    split_robustness_results = build_split_robustness_from_unified(
+        split_results=split_robustness_raw,
+        varset="bop",
+    )
+    if split_robustness_results is not None and len(split_robustness_results) > 0:
+        split_path = SUMMARY_DIR / "split_robustness_summary.csv"
+        split_robustness_results.to_csv(split_path, index=False)
+        print(f"Saved split-robustness summary: {split_path}")
 
     # Generate LaTeX tables
     print("\n" + "="*60)
@@ -731,6 +1045,20 @@ def main():
         path = table_generator.save_table(latex, 'table6_varset.tex')
         print(f"Generated: {path}")
 
+    # Table 7: Mechanism synthesis
+    mechanism_table = mechanism_results.get("table")
+    if mechanism_table is not None and len(mechanism_table) > 0:
+        latex = generate_table7_mechanism_synthesis(mechanism_table, font_size=table_generator.font_size)
+        if latex:
+            path = table_generator.save_table(latex, "table7_mechanism_synthesis.tex")
+            print(f"Generated: {path}")
+
+    # Table 8: Split robustness axis
+    if split_robustness_results is not None and len(split_robustness_results) > 0:
+        latex = table_generator.generate_table8_split_robustness(split_robustness_results)
+        path = table_generator.save_table(latex, "table8_split_robustness.tex")
+        print(f"Generated: {path}")
+
     # Generate figures
     print("\n" + "="*60)
     print("GENERATING PUBLICATION FIGURES")
@@ -777,6 +1105,7 @@ def main():
         subsample_results=subsample_results,
         horizon_results=horizon_results,
         varset_results=varset_results,
+        split_results=split_robustness_results,
         combination_summary=comb_results.get('summary'),
     )
 
@@ -802,6 +1131,17 @@ def main():
     if varset_results is not None:
         varset_results.to_csv(SUMMARY_DIR / "varset_results.csv", index=False)
 
+    if split_robustness_results is not None:
+        split_robustness_results.to_csv(SUMMARY_DIR / "split_robustness_results.csv", index=False)
+
+    if "table" in mechanism_results:
+        mechanism_results["table"].to_csv(SUMMARY_DIR / "mechanism_synthesis_table.csv", index=False)
+    if "detail" in mechanism_results:
+        mechanism_results["detail"].to_csv(SUMMARY_DIR / "mechanism_synthesis_detail.csv", index=False)
+    if "diagnostics" in mechanism_results:
+        with open(SUMMARY_DIR / "mechanism_synthesis_diagnostics.json", "w") as f:
+            json.dump(mechanism_results["diagnostics"], f, indent=2)
+
     # Print summary
     print("\n" + "="*60)
     print("SUMMARY")
@@ -822,6 +1162,7 @@ def main():
         "summary_dir": str(SUMMARY_DIR),
         "uses_unified_results": bool(unified_summaries),
         "uses_unified_tests": STATISTICAL_TESTS_UNIFIED_DIR.exists(),
+        "uses_mechanism_synthesis": bool(mechanism_results),
     }
     write_run_manifest(OUTPUT_DIR, config)
     if args.run_id and output_root is not None:

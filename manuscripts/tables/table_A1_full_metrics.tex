@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Complete Forecast Metrics: Parsimonious Specification, $h=1$ (Test Period)}
+\label{tab:full_metrics}
+\begin{tabular}{lccccccccc}
+\toprule
+Model & RMSE & MAE & MAPE & SMAPE & MASE & Pol.\ Loss & CRPS & Cov$_{80}$ & Cov$_{95}$ \\
+\midrule
+XGBoost & 640.6 & 475.7 & 11.82 & 13.06 & 1.59 & 900.8 & 466.4 & 2.8 & 5.6 \\
+XGB-Quantile & 655.5 & 521.8 & 12.25 & 13.43 & 1.75 & 1018.0 & 241.0 & 72.2 & 97.2 \\
+ARIMA & 1170.4 & 896.2 & 21.61 & 25.90 & 3.00 & 1785.6 & 734.2 & 41.7 & 50.0 \\
+Naive & 1178.9 & 935.9 & 20.47 & 24.70 & 3.14 & 1864.2 & 761.5 & 44.4 & 52.8 \\
+VECM & 1194.5 & 956.8 & 21.64 & 26.19 & 3.21 & 1892.3 & 782.4 & 36.1 & 52.8 \\
+BVAR & 1214.9 & 964.4 & 21.41 & 26.04 & 3.23 & 1917.2 & 792.1 & 38.9 & 50.0 \\
+\bottomrule
+\end{tabular}
+\par\vspace{0.5em}
+
+\noindent\footnotesize Notes:
+SMAPE = Symmetric Mean Absolute Percentage Error; Cov$_{80}$, Cov$_{95}$ = 
+empirical coverage rates (\%) of 80\% and 95\% prediction intervals.
+\end{table}

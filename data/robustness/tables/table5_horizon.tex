@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Forecast Horizon Robustness: RMSE by Horizon}
+\label{tab:horizon}
+\begin{tabular}{lcc}
+\toprule
+Model & h=1 & $h_{12}/h_1$ \\
+\midrule
+MS-VAR & \textbf{311.8} & -- \\
+MS-VECM & 357.7 & -- \\
+XGBoost & 640.6 & -- \\
+ARIMA & 1170.4 & -- \\
+Naive & 1178.9 & -- \\
+VECM & 1194.5 & -- \\
+BVAR & 1209.0 & -- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: Horizons in months. $h_{12}/h_1$ shows the deterioration 
+ratio as forecast horizon increases from 1 to 12 months. 
+Bold indicates best performance at each horizon.
+\end{tablenotes}
+\end{table}

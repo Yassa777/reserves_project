@@ -1,0 +1,11 @@
+variable,break_date,f_statistic,p_value,break_confirmed
+gross_reserves_usd_m,2022-04-01,0.7209,0.4873,False
+net_usable_reserves_usd_m,2022-04-01,0.4712,0.6248,False
+exports_usd_m,2022-04-01,7.973,0.0005,True
+imports_usd_m,2022-04-01,2.2561,0.1072,False
+remittances_usd_m,2022-04-01,1.8683,0.1571,False
+tourism_usd_m,2022-04-01,1.0578,0.3493,False
+cse_net_usd_m,2022-04-01,0.417,0.6597,False
+usd_lkr,2022-04-01,21.2924,0.0,True
+trade_balance_usd_m,2022-04-01,4.0353,0.019,True
+reserve_change_usd_m,2022-04-01,2.8353,0.0606,False

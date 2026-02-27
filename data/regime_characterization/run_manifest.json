@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-02-26T09:19:33.791336Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
+  "config_hash": "aac9ee58801e026b605044d1fbe801d874a4a804e0a4a8025e23db40483ddb11",
+  "config": {
+    "varset": "bop",
+    "n_regimes": 2,
+    "ar_order": 1,
+    "fit_split": "full",
+    "train_end": "2019-12-01",
+    "valid_end": "2022-12-01",
+    "fit_start": null,
+    "fit_end": null,
+    "output_dir": "data/regime_characterization"
+  },
+  "argv": [
+    "reserves-regime-characterization",
+    "--varset=bop",
+    "--n-regimes=2",
+    "--ar-order=1",
+    "--fit-split=full",
+    "--train-end=2019-12-01",
+    "--valid-end=2022-12-01",
+    "--output-dir=data/regime_characterization"
+  ],
+  "extra": {
+    "n_obs": 193
+  }
+}

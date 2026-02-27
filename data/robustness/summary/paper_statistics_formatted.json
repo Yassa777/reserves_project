@@ -1,0 +1,11 @@
+{
+  "n_models": "7",
+  "n_obs": "36",
+  "best_model": "MS-VAR",
+  "best_rmse": "311.8",
+  "improvement_vs_naive": "73.6\\%",
+  "mcs_size": "1",
+  "mcs_members": "MS-VAR",
+  "most_consistent": "Naive",
+  "most_consistent_cv": "0.108"
+}

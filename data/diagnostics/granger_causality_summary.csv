@@ -1,0 +1,6 @@
+test,best_lag,best_p_value,granger_causes,effective_nobs
+exports_usd_m → gross_reserves_usd_m,1,0.0396,True,223
+imports_usd_m → gross_reserves_usd_m,4,0.3587,False,224
+remittances_usd_m → gross_reserves_usd_m,1,0.1317,False,201
+usd_lkr → gross_reserves_usd_m,1,0.132,False,251
+cse_net_usd_m → gross_reserves_usd_m,1,0.3153,False,165

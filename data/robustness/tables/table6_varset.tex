@@ -1,0 +1,28 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Variable Set Robustness: RMSE by Specification}
+\label{tab:varset}
+\begin{tabular}{lcccccc}
+\toprule
+Model & BOP & Full & Monetary & PCA & Parsimonious & CV \\
+\midrule
+BoPIdentity & -- & 1278.3 & 1297.8 & 1295.8 & -- & 0.008 \\
+Naive & 1350.8 & 1297.8 & 1297.8 & 1295.8 & 1178.9 & 0.049 \\
+LocalLevelSV & -- & 1930.2 & 1900.3 & 1644.1 & -- & 0.086 \\
+ARIMA & 1249.9 & 2195.4 & 2334.7 & 1341.5 & 1170.4 & 0.337 \\
+XGBoost & 886.1 & \textbf{387.9} & \textbf{307.1} & 648.0 & 640.6 & 0.402 \\
+LSTM & -- & 718.8 & 1412.7 & 1739.9 & -- & 0.404 \\
+BVAR & 1359.6 & 567.4 & 2176.5 & 1483.2 & 1209.0 & 0.425 \\
+MS-VECM & 323.4 & 899.5 & 1183.3 & \textbf{444.5} & 357.7 & 0.594 \\
+MS-VAR & \textbf{315.2} & 1581.5 & 1126.4 & 734.9 & \textbf{311.8} & 0.671 \\
+VECM & 1556.3 & 5275.4 & 5782.7 & 1475.0 & 1194.5 & 0.742 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: CV = Coefficient of Variation (sensitivity to specification). 
+Lower CV indicates more stable performance across variable sets. 
+Bold indicates best performance for each specification.
+\end{tablenotes}
+\end{table}

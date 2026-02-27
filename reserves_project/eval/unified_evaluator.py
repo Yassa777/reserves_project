@@ -10,6 +10,11 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
+from reserves_project.config.evaluation_segments import (
+    DEFAULT_SEGMENT_ORDER,
+    normalize_segment_keys,
+    segment_date_mask,
+)
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.vector_ar.vecm import VECM, coint_johansen
 from statsmodels.tsa.statespace.structural import UnobservedComponents
@@ -37,6 +42,8 @@ except Exception:  # pragma: no cover - optional
     HAS_BVAR = False
 
 from reserves_project.eval.metrics import compute_metrics, naive_mae_scale, asymmetric_loss
+from reserves_project.eval.dma import augment_with_dma_dms
+from reserves_project.eval.windowing import filter_to_common_window
 
 from reserves_project.models.ms_switching_var import MarkovSwitchingVAR
 
@@ -1111,51 +1118,79 @@ class RollingOriginEvaluator:
 def summarize_results(
     results: pd.DataFrame,
     train_series: pd.Series,
+    window_mode: str = "full",
+    segment_keys: Optional[List[str]] = None,
 ) -> pd.DataFrame:
+    if window_mode not in {"full", "common_dates"}:
+        raise ValueError(f"Unsupported window_mode={window_mode}. Use 'full' or 'common_dates'.")
+
+    segment_keys = normalize_segment_keys(segment_keys, default=["all"])
+    eval_results = results.copy()
+    if window_mode == "common_dates":
+        eval_results = filter_to_common_window(eval_results)
+
     scale = naive_mae_scale(train_series.values)
     rows = []
-    for (model, split, horizon), subset in results.groupby(["model", "split", "horizon"]):
-        metrics = compute_metrics(
-            subset["actual"].values,
-            subset["forecast"].values,
-            mase_scale=scale,
-        )
-        policy_loss = asymmetric_loss(
-            subset["actual"].values,
-            subset["forecast"].values,
-            under_weight=2.0,
-            over_weight=1.0,
-        )
-        crps_vals = subset["crps"].values
-        log_vals = subset["log_score"].values
-        crps = float(np.nanmean(crps_vals)) if np.isfinite(crps_vals).any() else np.nan
-        log_score = float(np.nanmean(log_vals)) if np.isfinite(log_vals).any() else np.nan
-        valid_80 = subset["actual"].notna() & subset["lower_80"].notna() & subset["upper_80"].notna()
-        valid_95 = subset["actual"].notna() & subset["lower_95"].notna() & subset["upper_95"].notna()
-        coverage_80 = float(
-            np.nanmean(
-                (subset.loc[valid_80, "actual"] >= subset.loc[valid_80, "lower_80"])
-                & (subset.loc[valid_80, "actual"] <= subset.loc[valid_80, "upper_80"])
+    for (model, split, horizon), subset in eval_results.groupby(["model", "split", "horizon"]):
+        subset_dates = pd.to_datetime(subset["forecast_date"])
+        for segment in segment_keys:
+            seg_mask = segment_date_mask(subset_dates, segment)
+            seg_subset = subset.loc[seg_mask].copy()
+            if seg_subset.empty:
+                continue
+
+            valid_pairs = seg_subset["actual"].notna() & seg_subset["forecast"].notna()
+            effective_dates = pd.to_datetime(seg_subset.loc[valid_pairs, "forecast_date"]).sort_values().drop_duplicates()
+            effective_start = effective_dates.min() if len(effective_dates) else pd.NaT
+            effective_end = effective_dates.max() if len(effective_dates) else pd.NaT
+            n_common_dates = int(len(effective_dates)) if window_mode == "common_dates" else np.nan
+
+            metrics = compute_metrics(
+                seg_subset["actual"].values,
+                seg_subset["forecast"].values,
+                mase_scale=scale,
             )
-        ) if valid_80.any() else np.nan
-        coverage_95 = float(
-            np.nanmean(
-                (subset.loc[valid_95, "actual"] >= subset.loc[valid_95, "lower_95"])
-                & (subset.loc[valid_95, "actual"] <= subset.loc[valid_95, "upper_95"])
+            policy_loss = asymmetric_loss(
+                seg_subset["actual"].values,
+                seg_subset["forecast"].values,
+                under_weight=2.0,
+                over_weight=1.0,
             )
-        ) if valid_95.any() else np.nan
-        rows.append({
-            "model": model,
-            "split": split,
-            "horizon": horizon,
-            **metrics,
-            "policy_loss": policy_loss,
-            "crps": crps,
-            "log_score": log_score,
-            "coverage_80": coverage_80,
-            "coverage_95": coverage_95,
-            "n": int(subset["actual"].notna().sum()),
-        })
+            crps_vals = seg_subset["crps"].values
+            log_vals = seg_subset["log_score"].values
+            crps = float(np.nanmean(crps_vals)) if np.isfinite(crps_vals).any() else np.nan
+            log_score = float(np.nanmean(log_vals)) if np.isfinite(log_vals).any() else np.nan
+            valid_80 = seg_subset["actual"].notna() & seg_subset["lower_80"].notna() & seg_subset["upper_80"].notna()
+            valid_95 = seg_subset["actual"].notna() & seg_subset["lower_95"].notna() & seg_subset["upper_95"].notna()
+            coverage_80 = float(
+                np.nanmean(
+                    (seg_subset.loc[valid_80, "actual"] >= seg_subset.loc[valid_80, "lower_80"])
+                    & (seg_subset.loc[valid_80, "actual"] <= seg_subset.loc[valid_80, "upper_80"])
+                )
+            ) if valid_80.any() else np.nan
+            coverage_95 = float(
+                np.nanmean(
+                    (seg_subset.loc[valid_95, "actual"] >= seg_subset.loc[valid_95, "lower_95"])
+                    & (seg_subset.loc[valid_95, "actual"] <= seg_subset.loc[valid_95, "upper_95"])
+                )
+            ) if valid_95.any() else np.nan
+            rows.append({
+                "model": model,
+                "split": split,
+                "horizon": horizon,
+                "segment": segment,
+                **metrics,
+                "policy_loss": policy_loss,
+                "crps": crps,
+                "log_score": log_score,
+                "coverage_80": coverage_80,
+                "coverage_95": coverage_95,
+                "n": int(seg_subset["actual"].notna().sum()),
+                "window_mode": window_mode,
+                "effective_start": effective_start,
+                "effective_end": effective_end,
+                "n_common_dates": n_common_dates,
+            })
     return pd.DataFrame(rows)
 
 
@@ -1231,9 +1266,23 @@ def main():
     parser.add_argument("--exclude-bvar", action="store_true", help="Exclude BVAR adapter")
     parser.add_argument("--exclude-xgb", action="store_true", help="Exclude XGBoost adapter")
     parser.add_argument("--include-xgb-quantile", action="store_true", help="Include XGBoost quantile adapter")
+    parser.add_argument("--include-dma", action="store_true", help="Append DMA/DMS combinations")
+    parser.add_argument("--dma-alpha", type=float, default=0.99)
+    parser.add_argument("--dma-warmup-periods", type=int, default=12)
+    parser.add_argument("--dma-variance-window", type=int, default=24)
+    parser.add_argument("--dma-min-model-obs", type=int, default=24)
+    parser.add_argument("--dma-model-pool", default=None, help="Comma-separated DMA pool model names")
+    parser.add_argument("--window-mode", choices=["full", "common_dates"], default="full")
+    parser.add_argument("--segments", default=",".join(DEFAULT_SEGMENT_ORDER), help="Comma-separated segment keys")
+    parser.add_argument("--train-end", default=str(TRAIN_END.date()))
+    parser.add_argument("--valid-end", default=str(VALID_END.date()))
     args = parser.parse_args()
 
     horizons = [int(h.strip()) for h in args.horizons.split(",") if h.strip()]
+    segments = normalize_segment_keys([s.strip() for s in args.segments.split(",") if s.strip()])
+    train_end = pd.Timestamp(args.train_end)
+    valid_end = pd.Timestamp(args.valid_end)
+    dma_pool = [m.strip() for m in args.dma_model_pool.split(",") if m.strip()] if args.dma_model_pool else None
     df = load_varset_levels(args.varset)
     df = df.sort_index()
 
@@ -1262,24 +1311,67 @@ def main():
         exog_cols=exog_cols,
         models=models,
         horizons=horizons,
-        train_end=TRAIN_END,
-        valid_end=VALID_END,
+        train_end=train_end,
+        valid_end=valid_end,
         refit_interval=args.refit_interval,
         exog_mode=args.exog_mode,
         exog_forecaster=exog_forecaster,
     )
 
     results = evaluator.run()
-    summary = summarize_results(results, df.loc[df.index <= TRAIN_END, TARGET_VAR])
+    dma_weights = pd.DataFrame()
+    if args.include_dma:
+        results, dma_weights = augment_with_dma_dms(
+            results=results,
+            alpha=args.dma_alpha,
+            variance_window=args.dma_variance_window,
+            warmup_periods=args.dma_warmup_periods,
+            min_model_obs=args.dma_min_model_obs,
+            model_pool=dma_pool,
+        )
+    summary = summarize_results(
+        results,
+        df.loc[df.index <= train_end, TARGET_VAR],
+        window_mode=args.window_mode,
+        segment_keys=["all"],
+    )
+    summary_segments = summarize_results(
+        results,
+        df.loc[df.index <= train_end, TARGET_VAR],
+        window_mode=args.window_mode,
+        segment_keys=segments,
+    )
+    summary_full = summarize_results(
+        results,
+        df.loc[df.index <= train_end, TARGET_VAR],
+        window_mode="full",
+        segment_keys=["all"],
+    )
+    summary_common = summarize_results(
+        results,
+        df.loc[df.index <= train_end, TARGET_VAR],
+        window_mode="common_dates",
+        segment_keys=["all"],
+    )
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     results.to_csv(output_dir / f"rolling_origin_forecasts_{args.varset}.csv", index=False)
     summary.to_csv(output_dir / f"rolling_origin_summary_{args.varset}.csv", index=False)
+    summary_segments.to_csv(output_dir / f"rolling_origin_summary_segments_{args.varset}.csv", index=False)
+    summary_full.to_csv(output_dir / f"rolling_origin_summary_full_{args.varset}.csv", index=False)
+    summary_common.to_csv(output_dir / f"rolling_origin_summary_common_dates_{args.varset}.csv", index=False)
+    if not dma_weights.empty:
+        dma_weights.to_csv(output_dir / f"dma_weights_{args.varset}.csv", index=False)
 
     print("Saved:")
     print(f"  - {output_dir / f'rolling_origin_forecasts_{args.varset}.csv'}")
     print(f"  - {output_dir / f'rolling_origin_summary_{args.varset}.csv'}")
+    print(f"  - {output_dir / f'rolling_origin_summary_segments_{args.varset}.csv'}")
+    print(f"  - {output_dir / f'rolling_origin_summary_full_{args.varset}.csv'}")
+    print(f"  - {output_dir / f'rolling_origin_summary_common_dates_{args.varset}.csv'}")
+    if not dma_weights.empty:
+        print(f"  - {output_dir / f'dma_weights_{args.varset}.csv'}")
 
 
 if __name__ == "__main__":

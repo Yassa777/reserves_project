@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Diebold-Mariano Test Results}
+\label{tab:dm_tests}
+\begin{tabular}{lccc}
+\toprule
+Model & DM Statistic & p-value & Significance \\
+\midrule
+ARIMA & -0.06 & 0.950 &  \\
+BVAR & 3.48 & 0.001 & *** \\
+MS-VAR & -5.22 & 0.000 & *** \\
+MS-VECM & -5.11 & 0.000 & *** \\
+VECM & 0.88 & 0.385 &  \\
+XGBoost & -4.30 & 0.000 & *** \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: Diebold-Mariano test statistics with HAC standard errors. 
+Positive values indicate the row model outperforms the column model. 
+*** p < 0.01; ** p < 0.05; * p < 0.10.
+\end{tablenotes}
+\end{table}

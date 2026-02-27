@@ -1,0 +1,26 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Out-of-Sample Forecast Accuracy}
+\label{tab:accuracy}
+\begin{tabular}{lcccccc}
+\toprule
+Model & RMSE & MAE & MAPE (\%) & Policy Loss & MCS & Rank \\
+\midrule
+MS-VAR & \textbf{311.8} & \textbf{230.3} & \textbf{5.20} & \textbf{408.4} & $\checkmark$ & 1 \\
+MS-VECM & 357.7 & 274.1 & 6.19 & 518.1 &  & 2 \\
+XGBoost & 640.6 & 475.7 & 11.82 & 900.8 &  & 3 \\
+ARIMA & 1170.4 & 896.2 & 21.61 & 1785.6 &  & 4 \\
+Naive & 1178.9 & 935.9 & 20.47 & 1864.2 &  & 5 \\
+VECM & 1194.5 & 956.8 & 21.64 & 1892.3 &  & 6 \\
+BVAR & 1209.0 & 959.7 & 21.29 & 1907.3 &  & 7 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: RMSE = Root Mean Squared Error; MAE = Mean Absolute Error; 
+MAPE = Mean Absolute Percentage Error; Policy Loss = asymmetric loss penalizing reserve shortfalls; 
+MCS = 90\% Model Confidence Set membership. 
+Bold indicates best performance. Test period: 2023--2025.
+\end{tablenotes}
+\end{table}

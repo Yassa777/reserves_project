@@ -1,0 +1,23 @@
+{
+  "mcs": [
+    "MS-VAR"
+  ],
+  "eliminated": [
+    "BVAR",
+    "VECM",
+    "Naive",
+    "ARIMA",
+    "XGBoost",
+    "MS-VECM"
+  ],
+  "p_values": [
+    0.0,
+    0.001,
+    0.0,
+    0.0,
+    0.008,
+    0.017
+  ],
+  "alpha": 0.1,
+  "n_obs": 36
+}
