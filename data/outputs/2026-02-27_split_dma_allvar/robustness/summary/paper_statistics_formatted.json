@@ -1,0 +1,12 @@
+{
+  "n_models": "9",
+  "n_obs": "27",
+  "best_model": "MS-VAR",
+  "best_rmse": "315.2",
+  "improvement_vs_naive": "76.7\\%",
+  "mcs_size": "4",
+  "mcs_members": "DMA, DMS, MS-VAR, MS-VECM",
+  "most_consistent": "Naive",
+  "most_consistent_cv": "0.108",
+  "deterioration_ratio": "6.10"
+}

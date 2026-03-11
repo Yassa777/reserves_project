@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-02-27T03:58:03.792665Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "014521331136a7eafbda7e3a0134e56292e39b8a",
+  "config_hash": "254fd37252f0194a3ca44897cd8e50335d258c994149678c52ae73bf4eb55ca1",
+  "config": {
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/outputs/2026-02-27_split_dma_allvar/robustness",
+    "tables_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/outputs/2026-02-27_split_dma_allvar/robustness/tables",
+    "figures_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/outputs/2026-02-27_split_dma_allvar/robustness/figures",
+    "summary_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/outputs/2026-02-27_split_dma_allvar/robustness/summary",
+    "uses_unified_results": true,
+    "uses_unified_tests": true,
+    "uses_mechanism_synthesis": true
+  },
+  "argv": [
+    "reserves-tables",
+    "--run-id=2026-02-27_split_dma_allvar"
+  ]
+}

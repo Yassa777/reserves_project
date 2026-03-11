@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Subsample Robustness: RMSE by Period}
+\label{tab:subsample}
+\begin{tabular}{lccccc}
+\toprule
+Model & Crisis & COVID & Post-Default & Full Sample & Avg. Rank \\
+\midrule
+MS-VECM & \textbf{579.5} & \textbf{662.3} & 357.7 & \textbf{480.0} & 1.6 \\
+MS-VAR & 701.3 & 675.4 & \textbf{311.8} & 540.1 & 1.8 \\
+DMA & 777.1 & 919.6 & 357.7 & 602.1 & 2.8 \\
+DMS & 978.0 & 1176.1 & 357.7 & 732.4 & 3.9 \\
+XGBoost & 1183.5 & 1234.9 & 640.6 & 947.9 & 5.0 \\
+Naive & 1328.1 & 1512.1 & 1178.9 & 1254.7 & 6.2 \\
+BVAR & 1420.2 & 1603.6 & 1211.4 & 1318.5 & 7.5 \\
+ARIMA & 1986.3 & 1625.3 & 1170.4 & 1624.6 & 8.0 \\
+VECM & 1532.2 & 1680.2 & 1194.5 & 1371.4 & 8.2 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: Pre-Crisis: 2012--2018; Crisis: 2019--2022; 
+COVID: 2020--2021; Post-Default: 2023--2025. 
+Bold indicates best performance in each period.
+\end{tablenotes}
+\end{table}

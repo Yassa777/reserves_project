@@ -1,0 +1,85 @@
+{
+  "timestamp": "2026-02-27T03:52:45.782328Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "014521331136a7eafbda7e3a0134e56292e39b8a",
+  "config_hash": "7ee274a7a8cdb101bc6b8c2cf253fc6db35572a8646af479533e07bf76c7170f",
+  "config": {
+    "varsets": [
+      "parsimonious",
+      "bop",
+      "monetary",
+      "pca",
+      "full"
+    ],
+    "split_specs": [
+      {
+        "label": "baseline",
+        "train_end": "2019-12-01",
+        "valid_end": "2022-12-01"
+      },
+      {
+        "label": "early",
+        "train_end": "2018-12-01",
+        "valid_end": "2021-12-01"
+      },
+      {
+        "label": "late",
+        "train_end": "2020-12-01",
+        "valid_end": "2023-12-01"
+      }
+    ],
+    "primary_split_label": "baseline",
+    "refit_interval": 12,
+    "horizons": [
+      1,
+      3,
+      6,
+      12
+    ],
+    "exog_mode": "forecast",
+    "exog_forecast": "naive",
+    "include_ms": true,
+    "include_lstm": false,
+    "include_llsv": false,
+    "include_bop": false,
+    "include_dma": true,
+    "dma_alpha": 0.99,
+    "dma_warmup_periods": 12,
+    "dma_variance_window": 24,
+    "dma_min_model_obs": 24,
+    "dma_model_pool": null,
+    "exclude_bvar": false,
+    "exclude_xgb": false,
+    "include_xgb_quantile": false,
+    "window_mode": "full",
+    "segments": [
+      "all",
+      "crisis",
+      "tranquil"
+    ],
+    "xgb_params": null,
+    "lstm_params": null,
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/outputs/2026-02-27_split_dma_allvar/forecast_results_unified"
+  },
+  "argv": [
+    "reserves-unified",
+    "--varsets=parsimonious,bop,monetary,pca,full",
+    "--horizons=1,3,6,12",
+    "--refit-interval=12",
+    "--exog-mode=forecast",
+    "--exog-forecast=naive",
+    "--window-mode=full",
+    "--segments=all,crisis,tranquil",
+    "--train-end=2019-12-01",
+    "--valid-end=2022-12-01",
+    "--split-specs=baseline:2019-12-01:2022-12-01,early:2018-12-01:2021-12-01,late:2020-12-01:2023-12-01",
+    "--include-ms",
+    "--include-dma",
+    "--dma-alpha=0.99",
+    "--dma-warmup-periods=12",
+    "--dma-variance-window=24",
+    "--dma-min-model-obs=24",
+    "--run-id=2026-02-27_split_dma_allvar"
+  ]
+}

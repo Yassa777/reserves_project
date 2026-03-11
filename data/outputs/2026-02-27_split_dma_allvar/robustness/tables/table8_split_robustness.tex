@@ -1,0 +1,26 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Split Robustness Axis: RMSE Across Train/Validation/Test Boundaries}
+\label{tab:split_robustness}
+\begin{tabular}{lccccc}
+\toprule
+Model & baseline & early & late & Avg. Rank & Rank SD \\
+\midrule
+MS-VAR & \textbf{315.2} & \textbf{275.9} & \textbf{260.6} & 1.00 & 0.00 \\
+DMA & 321.7 & 282.9 & 264.5 & 2.33 & 0.58 \\
+DMS & 326.0 & 285.4 & \textbf{260.6} & 2.67 & 1.53 \\
+MS-VECM & 323.4 & 291.4 & 268.9 & 3.67 & 0.58 \\
+XGBoost & 886.1 & 1115.0 & 623.5 & 5.00 & 0.00 \\
+ARIMA & 1249.9 & 1272.2 & 1256.1 & 6.33 & 0.58 \\
+Naive & 1350.8 & 1223.8 & 1360.2 & 7.00 & 1.00 \\
+BVAR & 1365.3 & 1278.9 & 1349.4 & 7.67 & 0.58 \\
+VECM & 1556.3 & 1439.8 & 1495.6 & 9.00 & 0.00 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: Lower Avg. Rank and Rank SD indicate stronger stability across split definitions.
+\item Bold indicates best RMSE within each split specification.
+\end{tablenotes}
+\end{table}

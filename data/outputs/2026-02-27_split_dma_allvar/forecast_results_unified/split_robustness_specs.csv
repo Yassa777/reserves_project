@@ -1,0 +1,4 @@
+split_label,train_end,valid_end,is_primary
+baseline,2019-12-01,2022-12-01,True
+early,2018-12-01,2021-12-01,False
+late,2020-12-01,2023-12-01,False
