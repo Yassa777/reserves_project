@@ -1,19 +1,38 @@
 {
-  "timestamp": "2026-02-26T09:22:32.826490Z",
+  "timestamp": "2026-03-11T06:25:04.974495Z",
   "python": "3.11.8",
   "platform": "macOS-26.2-arm64-arm-64bit",
-  "git_commit": "2c4b2f0c88669dbd99b7828471019901e2de6e80",
-  "config_hash": "6b603a3bc0cc6a2ee592dad9304b8efe4d5eb89ac5a9458a14ddb2a0055fac21",
+  "git_commit": "2c3e94e8e5376a82f67851df18f9f7e498590aba",
+  "config_hash": "1b38abc37f2e3ddca68a29163c281d0369bb8202dc5b5ef78fa40e4e44f4922a",
   "config": {
-    "varset": "bop",
+    "varset": "parsimonious",
+    "model": "xgb",
+    "n_splits": 3,
+    "seed": 42,
     "skip_xgb": false,
-    "skip_lstm": true,
-    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning"
+    "skip_lstm": false,
+    "selection_criterion": "mean_validation_rmse",
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning",
+    "artifact_paths": {
+      "xgb": {
+        "summary_json": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/xgb_tuning_summary_parsimonious.json",
+        "cv_results_csv": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/xgb_cv_results_parsimonious.csv",
+        "fold_design_csv": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/xgb_fold_design_parsimonious.csv",
+        "best_params_json": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/xgb_best_params_parsimonious.json"
+      },
+      "appendix_tables": {
+        "design_csv": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/ml_tuning_design_summary.csv",
+        "selected_csv": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/ml_tuning_selected_summary.csv",
+        "design_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/table_a7_ml_tuning_design.tex",
+        "selected_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/model_verification/ml_tuning/table_a8_ml_tuning_selected.tex"
+      }
+    }
   },
   "argv": [
-    "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/reserves_project/pipelines/tune_ml_models.py",
-    "--varset",
-    "bop",
-    "--skip-lstm"
+    "reserves-tune-ml",
+    "--varset=parsimonious",
+    "--model=xgb",
+    "--n-splits=3",
+    "--seed=42"
   ]
 }

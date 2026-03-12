@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Selected machine-learning hyperparameters}
+\label{tab:ml_tuning_selected}
+\begin{tabular}{llccccccccc}
+\toprule
+Model & Varset & LR & Depth & Trees & Subsample & Epochs & Units & Dropout & Early stopping & Mean CV RMSE \\
+\midrule
+XGBoost & parsimonious & 0.100 & 3 & 200 & 0.8 & -- & -- & -- & none & 665.0 \\
+XGBoost & bop & 0.100 & 4 & 300 & 1.0 & -- & -- & -- & none & 894.7 \\
+LSTM & parsimonious & 0.001 & -- & -- & -- & 60 & 16 & 0.2 & val\_loss, patience=10 & 907.5 \\
+LSTM & bop & 0.001 & -- & -- & -- & 60 & 32 & 0.3 & val\_loss, patience=10 & 811.0 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Notes: LR = learning rate. Dashes indicate parameters not applicable to the given model family. 
+Mean CV RMSE is the selection objective reported in Tables~\ref{tab:ml_tuning_design} and~\ref{tab:ml_tuning_selected}.
+\end{tablenotes}
+\end{table}

@@ -1,0 +1,4 @@
+model,varset,candidate_id,seq_length,units,dropout,learning_rate,epochs,batch_size,early_stopping_monitor,early_stopping_patience,seed_base,fold1_train_sequences,fold1_val_sequences,fold1_rmse,fold1_epochs,fold2_train_sequences,fold2_val_sequences,fold2_rmse,fold2_epochs,fold3_train_sequences,fold3_val_sequences,fold3_rmse,fold3_epochs,mean_validation_rmse,std_validation_rmse,mean_trained_epochs
+LSTM,bop,1,6,32,0.3,0.001,60,16,val_loss,10,42,27,33,443.3661856553581,20,60,33,1115.9512421990323,18,93,33,873.569227220263,22,810.9622183582178,278.12753997696035,20.0
+LSTM,bop,2,12,32,0.2,0.001,60,16,val_loss,10,42,21,33,961.6373564810103,25,54,33,1254.8030124466432,11,87,33,929.3059007366735,14,1048.582089888109,146.41637529845426,16.666666666666668
+LSTM,bop,3,6,16,0.2,0.001,60,16,val_loss,10,42,27,33,679.0008999705844,37,60,33,923.6001267299051,19,93,33,925.4286990694094,17,842.676575256633,115.7385874271792,24.333333333333332

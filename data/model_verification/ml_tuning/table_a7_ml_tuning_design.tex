@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Machine-learning hyperparameter search design}
+\label{tab:ml_tuning_design}
+\begin{tabular}{llp{5.8cm}p{5.6cm}p{2.7cm}}
+\toprule
+Model & Varset & Search space & Fold design & Selection rule \\
+\midrule
+XGBoost & parsimonious & Three explicit candidate configurations: C1=(n\_estimators=200, max\_depth=3, learning\_rate=0.1, subsample=0.8), C2=(n\_estimators=500, max\_depth=4, learning\_rate=0.05, subsample=0.8), C3=(n\_estimators=300, max\_depth=4, learning\_rate=0.1, subsample=1.0); colsample\_bytree=0.8 and random\_state=42 in all cases. & F1: train 2008-01-01 to 2010-12-01 (n=36), validate 2011-01-01 to 2013-12-01 (n=36); F2: train 2008-01-01 to 2013-12-01 (n=72), validate 2014-01-01 to 2016-12-01 (n=36); F3: train 2008-01-01 to 2016-12-01 (n=108), validate 2017-01-01 to 2019-12-01 (n=36) & mean validation rmse \\
+XGBoost & bop & Three explicit candidate configurations: C1=(n\_estimators=200, max\_depth=3, learning\_rate=0.1, subsample=0.8), C2=(n\_estimators=500, max\_depth=4, learning\_rate=0.05, subsample=0.8), C3=(n\_estimators=300, max\_depth=4, learning\_rate=0.1, subsample=1.0); colsample\_bytree=0.8 and random\_state=42 in all cases. & F1: train 2010-01-01 to 2012-06-01 (n=30), validate 2012-07-01 to 2014-12-01 (n=30); F2: train 2010-01-01 to 2014-12-01 (n=60), validate 2015-01-01 to 2017-06-01 (n=30); F3: train 2010-01-01 to 2017-06-01 (n=90), validate 2017-07-01 to 2019-12-01 (n=30) & mean validation rmse \\
+LSTM & parsimonious & Three explicit candidate configurations: C1=(seq\_length=6, units=32, dropout=0.3, learning\_rate=0.001, epochs=60, batch\_size=16), C2=(seq\_length=12, units=32, dropout=0.2, learning\_rate=0.001, epochs=60, batch\_size=16), C3=(seq\_length=6, units=16, dropout=0.2, learning\_rate=0.001, epochs=60, batch\_size=16); early stopping monitors val\_loss with patience=10. & F1: train 2007-01-01 to 2010-03-01 (n=39), validate 2010-04-01 to 2013-06-01 (n=39); F2: train 2007-01-01 to 2013-06-01 (n=78), validate 2013-07-01 to 2016-09-01 (n=39); F3: train 2007-01-01 to 2016-09-01 (n=117), validate 2016-10-01 to 2019-12-01 (n=39); usable sequence counts vary by seq\_length and are reported in the CV results CSV. & mean validation rmse \\
+LSTM & bop & Three explicit candidate configurations: C1=(seq\_length=6, units=32, dropout=0.3, learning\_rate=0.001, epochs=60, batch\_size=16), C2=(seq\_length=12, units=32, dropout=0.2, learning\_rate=0.001, epochs=60, batch\_size=16), C3=(seq\_length=6, units=16, dropout=0.2, learning\_rate=0.001, epochs=60, batch\_size=16); early stopping monitors val\_loss with patience=10. & F1: train 2009-01-01 to 2011-09-01 (n=33), validate 2011-10-01 to 2014-06-01 (n=33); F2: train 2009-01-01 to 2014-06-01 (n=66), validate 2014-07-01 to 2017-03-01 (n=33); F3: train 2009-01-01 to 2017-03-01 (n=99), validate 2017-04-01 to 2019-12-01 (n=33); usable sequence counts vary by seq\_length and are reported in the CV results CSV. & mean validation rmse \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Notes: Fold design is reported on the effective estimation sample after feature construction. 
+For LSTM, sequence-effective train counts differ by sequence length and are therefore reported in the exported CV results.
+\end{tablenotes}
+\end{table}

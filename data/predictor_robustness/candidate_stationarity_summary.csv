@@ -1,0 +1,24 @@
+variable,Variable,effective_nobs,adf_p_value,kpss_p_value,za_break_date,integration_order,Screening_Status,Included_In
+m2_lkr_m,"Broad money (M2, LKR)",217,1.0,0.01,2019-05-01,I(1) or higher - Non-stationary,Excluded,--
+m2_usd_m,"Broad money (M2, USD)",217,0.0594,0.0131,2020-04-01,I(1) or higher - Non-stationary,Main text,"Monetary, PCA, Full"
+cse_net_usd_m,CSE net flows,166,0.0715,0.0397,2021-11-01,I(1) or higher - Non-stationary,Appendix only,Appendix robustness: BoP + CSE
+ca_proxy_usd_m,Current-account proxy,252,0.0093,0.1,2013-05-01,I(0) - Stationary,Excluded,--
+exports_usd_m,Exports,224,0.0487,0.0536,2010-06-01,I(0) - Stationary,Main text,"BoP, PCA, Full"
+fx_reserves_usd_m,FX reserves,146,0.9112,0.0602,2020-09-01,Inconclusive - Possible structural break,Excluded,--
+gold_usd_m,Gold holdings,146,0.4911,0.01,2020-01-01,I(1) or higher - Non-stationary,Excluded,--
+gross_reserves_usd_m,Gross reserves,252,0.5488,0.01,2020-08-01,I(1) or higher - Non-stationary,Target,"Parsimonious (target), BoP (target), Monetary (target), PCA (target), Full (target)"
+imf_position_usd_m,IMF reserve position,146,0.731,0.01,2022-09-01,I(1) or higher - Non-stationary,Excluded,--
+import_cover_months,Import cover,252,0.5488,0.01,2020-08-01,I(1) or higher - Non-stationary,Excluded,--
+imports_usd_m,Imports,225,0.0706,0.01,2010-11-01,I(1) or higher - Non-stationary,Main text,"BoP, PCA, Full"
+inflation_yoy_pct,Inflation (YoY),71,0.9149,0.0361,,I(1) or higher - Non-stationary,Excluded,--
+net_usable_reserves_usd_m,Net usable reserves,252,0.416,0.01,2020-08-01,I(1) or higher - Non-stationary,Excluded,--
+portfolio_liabilities_usd_b,Portfolio liabilities,157,0.7835,0.0517,2021-02-01,Inconclusive - Possible structural break,Appendix only,Appendix robustness: BoP + debt + portfolio
+remittances_usd_m,Remittances,202,0.2277,0.01,2021-01-01,I(1) or higher - Non-stationary,Main text,"BoP, PCA, Full"
+reserve_change_usd_m,Reserve change,251,0.0015,0.1,2020-08-01,I(0) - Stationary,Excluded,--
+reserve_change_pct,Reserve change (%),251,0.0,0.1,2022-11-01,I(0) - Stationary,Excluded,--
+m0_lkr_m,Reserve money (M0),217,0.9969,0.01,2020-04-01,I(1) or higher - Non-stationary,Excluded,--
+sdrs_usd_m,SDRs,146,0.3342,0.1,2021-07-01,Inconclusive - Possible structural break,Excluded,--
+total_short_term_debt_lkr_m,Short-term debt (LKR),241,0.6008,0.01,2021-02-01,I(1) or higher - Non-stationary,Appendix only,Appendix robustness: BoP + debt
+tourism_usd_m,Tourism earnings,192,0.5813,0.01,2019-12-01,I(1) or higher - Non-stationary,Main text,"BoP, PCA, Full"
+trade_balance_usd_m,Trade balance,224,0.0242,0.01,2010-11-01,I(0) - Trend-stationary,Main text,"Parsimonious, PCA, Full"
+usd_lkr,USD/LKR,252,0.5106,0.01,2022-02-01,I(1) or higher - Non-stationary,Main text,"Parsimonious, Monetary, PCA, Full"

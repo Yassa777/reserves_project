@@ -1,0 +1,124 @@
+{
+  "screening": {
+    "n_candidate_columns": 26,
+    "n_main_text_predictors": 7,
+    "n_appendix_only_predictors": 3,
+    "n_excluded": 15
+  },
+  "diagnostics": {
+    "n_usable_series": 23,
+    "seasonal_variables_threshold_0_3": [
+      "exports_usd_m",
+      "imports_usd_m",
+      "tourism_usd_m",
+      "trade_balance_usd_m"
+    ]
+  },
+  "omitted_variable_stability": [
+    {
+      "baseline_spec": "bop",
+      "spec_key": "bop",
+      "spec_label": "BoP baseline",
+      "top_model": "MS-VAR",
+      "top_rmse": 315.24487674590387,
+      "spearman_rank_corr_vs_baseline": 1.0
+    },
+    {
+      "baseline_spec": "bop",
+      "spec_key": "bop_cse",
+      "spec_label": "BoP + CSE flows",
+      "top_model": "MS-VAR",
+      "top_rmse": 361.24586033904575,
+      "spearman_rank_corr_vs_baseline": 0.9833333333333333
+    },
+    {
+      "baseline_spec": "bop",
+      "spec_key": "bop_debt",
+      "spec_label": "BoP + short-term debt",
+      "top_model": "MS-VECM",
+      "top_rmse": 330.6378653110402,
+      "spearman_rank_corr_vs_baseline": 0.8833333333333333
+    },
+    {
+      "baseline_spec": "bop",
+      "spec_key": "bop_debt_portfolio",
+      "spec_label": "BoP + debt + portfolio liabilities",
+      "top_model": "MS-VECM",
+      "top_rmse": 326.15428327013115,
+      "spearman_rank_corr_vs_baseline": 0.8833333333333333
+    }
+  ],
+  "transformation_stability": [
+    {
+      "baseline_spec": "bop",
+      "spec_key": "bop",
+      "spec_label": "BoP baseline",
+      "top_model": "MS-VAR",
+      "top_rmse": 315.24487674590387,
+      "spearman_rank_corr_vs_baseline": 1.0
+    },
+    {
+      "baseline_spec": "bop",
+      "spec_key": "bop_stl_adjusted",
+      "spec_label": "BoP + STL-adjusted seasonal flows",
+      "top_model": "DMS",
+      "top_rmse": 328.3888810275143,
+      "spearman_rank_corr_vs_baseline": 0.8833333333333333
+    },
+    {
+      "baseline_spec": "bop",
+      "spec_key": "parsimonious",
+      "spec_label": "Parsimonious baseline",
+      "top_model": "MS-VAR",
+      "top_rmse": 311.7527123873274,
+      "spearman_rank_corr_vs_baseline": 0.9666666666666667
+    },
+    {
+      "baseline_spec": "bop",
+      "spec_key": "parsimonious_stl_adjusted",
+      "spec_label": "Parsimonious + STL-adjusted trade balance",
+      "top_model": "MS-VAR",
+      "top_rmse": 341.75711050611517,
+      "spearman_rank_corr_vs_baseline": 0.9333333333333332
+    },
+    {
+      "baseline_spec": "parsimonious",
+      "spec_key": "bop",
+      "spec_label": "BoP baseline",
+      "top_model": "MS-VAR",
+      "top_rmse": 315.24487674590387,
+      "spearman_rank_corr_vs_baseline": 0.9666666666666667
+    },
+    {
+      "baseline_spec": "parsimonious",
+      "spec_key": "bop_stl_adjusted",
+      "spec_label": "BoP + STL-adjusted seasonal flows",
+      "top_model": "DMS",
+      "top_rmse": 328.3888810275143,
+      "spearman_rank_corr_vs_baseline": 0.9
+    },
+    {
+      "baseline_spec": "parsimonious",
+      "spec_key": "parsimonious",
+      "spec_label": "Parsimonious baseline",
+      "top_model": "MS-VAR",
+      "top_rmse": 311.7527123873274,
+      "spearman_rank_corr_vs_baseline": 1.0
+    },
+    {
+      "baseline_spec": "parsimonious",
+      "spec_key": "parsimonious_stl_adjusted",
+      "spec_label": "Parsimonious + STL-adjusted trade balance",
+      "top_model": "MS-VAR",
+      "top_rmse": 341.75711050611517,
+      "spearman_rank_corr_vs_baseline": 0.9833333333333333
+    }
+  ],
+  "table_outputs": {
+    "screening_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a11_predictor_screening.tex",
+    "stationarity_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a12_stationarity_outputs.tex",
+    "temporal_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a13_seasonality_outputs.tex",
+    "omitted_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a14_omitted_variable_robustness.tex",
+    "transform_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a15_transformation_robustness.tex"
+  }
+}

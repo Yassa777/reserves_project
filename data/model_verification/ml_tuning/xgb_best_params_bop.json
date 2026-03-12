@@ -7,5 +7,6 @@
     "colsample_bytree": 0.8,
     "random_state": 42
   },
-  "best_rmse": 894.7051798457574
+  "best_rmse": 894.7051798457574,
+  "selection_criterion": "mean_validation_rmse"
 }

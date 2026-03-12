@@ -1,0 +1,23 @@
+variable,Variable,acf_effective_nobs,acf_acf_lag1,lb_p_12,stl_trend_strength,stl_seasonal_strength,stl_has_seasonality,Screening_Status,Included_In
+m2_lkr_m,"Broad money (M2, LKR)",217,0.9791,0.0,0.9968,0.0887,False,Excluded,--
+m2_usd_m,"Broad money (M2, USD)",217,0.9871,0.0,0.9901,0.1119,False,Main text,"Monetary, PCA, Full"
+cse_net_usd_m,CSE net flows,166,0.3052,0.0,0.308,0.071,False,Appendix only,Appendix robustness: BoP + CSE
+ca_proxy_usd_m,Current-account proxy,252,0.6601,0.0,0.594,0.2841,False,Excluded,--
+exports_usd_m,Exports,224,0.752,0.0,0.7896,0.4553,True,Main text,"BoP, PCA, Full"
+fx_reserves_usd_m,FX reserves,146,0.9442,0.0,0.8947,0.0915,False,Excluded,--
+gold_usd_m,Gold holdings,146,0.9805,0.0,0.9545,0.0222,False,Excluded,--
+gross_reserves_usd_m,Gross reserves,252,0.971,0.0,0.9343,0.0,False,Target,"Parsimonious (target), BoP (target), Monetary (target), PCA (target), Full (target)"
+imf_position_usd_m,IMF reserve position,146,0.974,0.0,0.9655,0.0055,False,Excluded,--
+import_cover_months,Import cover,252,0.971,0.0,0.9343,0.0,False,Excluded,--
+imports_usd_m,Imports,225,0.8287,0.0,0.8237,0.3006,True,Main text,"BoP, PCA, Full"
+net_usable_reserves_usd_m,Net usable reserves,252,0.9778,0.0,0.9336,0.0,False,Excluded,--
+portfolio_liabilities_usd_b,Portfolio liabilities,157,0.9719,0.0,0.9219,0.0974,False,Appendix only,Appendix robustness: BoP + debt + portfolio
+remittances_usd_m,Remittances,202,0.8506,0.0,0.7899,0.1707,False,Main text,"BoP, PCA, Full"
+reserve_change_usd_m,Reserve change,251,-0.3013,0.0,0.0164,0.156,False,Excluded,--
+reserve_change_pct,Reserve change (%),251,-0.278,0.0,0.0283,0.1346,False,Excluded,--
+m0_lkr_m,Reserve money (M0),217,0.9753,0.0,0.9918,0.0,False,Excluded,--
+sdrs_usd_m,SDRs,146,0.7977,0.0,0.036,0.0523,False,Excluded,--
+total_short_term_debt_lkr_m,Short-term debt (LKR),241,0.9868,0.0,0.9684,0.0381,False,Appendix only,Appendix robustness: BoP + debt
+tourism_usd_m,Tourism earnings,192,0.8975,0.0,0.8754,0.5929,True,Main text,"BoP, PCA, Full"
+trade_balance_usd_m,Trade balance,224,0.6814,0.0,0.7001,0.384,True,Main text,"Parsimonious, PCA, Full"
+usd_lkr,USD/LKR,252,0.9863,0.0,0.9555,0.0214,False,Main text,"Parsimonious, Monetary, PCA, Full"

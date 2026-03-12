@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\caption{Factorial Decomposition of Architecture and Information Effects}
+\label{tab:did}
+\begin{tabular}{lcc|c}
+\toprule
+& Parsimonious & BoP & Row Mean \\
+\midrule
+MS-VAR & 330.2 & 315.2 & 322.7 \\
+XGBoost & 714.9 & 886.1 & 800.5 \\
+\midrule
+Column Mean & 522.6 & 600.7 & \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Entries are RMSE values computed on the common-support $h=1$ post-default window (2023:01--2025:03; $n=27$). Appendix Table~\ref{tab:disentangling_uncertainty} reports stationary block-bootstrap confidence intervals for the architecture, information, and interaction contrasts.
+\end{tablenotes}
+\end{table}

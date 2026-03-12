@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Alternative seasonal-transformation robustness}
+\label{tab:transformation_robustness}
+\begin{tabular}{lcccc}
+\toprule
+Model & Parsimonious baseline & Parsimonious + STL-adjusted trade balance & BoP baseline & BoP + STL-adjusted seasonal flows \\
+\midrule
+MS-VAR & 1 [311.8] & 1 [341.8] & 1 [315.2] & 2 [328.4] \\
+DMA & 2 [357.7] & 2 [356.6] & 2 [321.7] & 3 [328.4] \\
+DMS & 3 [357.7] & 3 [358.8] & 4 [326.0] & 1 [328.4] \\
+MS-VECM & 4 [357.7] & 4 [358.8] & 3 [323.4] & 4 [388.4] \\
+XGBoost & 5 [640.6] & 5 [590.2] & 5 [886.1] & 5 [939.2] \\
+ARIMA & 6 [1170.4] & 6 [1029.9] & 6 [1249.9] & 6 [1234.5] \\
+Naive & 7 [1178.9] & 8 [1178.9] & 7 [1350.8] & 8 [1350.8] \\
+BVAR & 9 [1213.7] & 9 [1205.1] & 8 [1363.3] & 7 [1347.2] \\
+VECM & 8 [1194.5] & 7 [1174.5] & 9 [1556.3] & 9 [1563.8] \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Notes: Cells report test-period rank with common-dates RMSE in brackets for the one-step-ahead forecast. STL month-of-year factors are estimated on the training sample only (through 2019-12) and applied to the seasonal variables Exports, Imports, Tourism earnings, Trade balance. Parsimonious baseline: n=36, window=2023:01--2025:12; Parsimonious + STL-adjusted trade balance: n=36, window=2023:01--2025:12; BoP baseline: n=27, window=2023:01--2025:03; BoP + STL-adjusted seasonal flows: n=27, window=2023:01--2025:03
+\end{tablenotes}
+\end{table}

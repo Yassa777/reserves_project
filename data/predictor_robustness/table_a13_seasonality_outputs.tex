@@ -1,0 +1,40 @@
+\begin{longtable}{p{3.0cm}ccccccp{1.9cm}}
+\caption{Temporal-dependence and seasonality diagnostics for usable candidate series}\label{tab:seasonality_outputs}\\
+\toprule
+Variable & Obs & ACF(1) & Q(12) p & Trend & Seasonal & Seasonal? & Status \\
+\midrule
+\endfirsthead
+\multicolumn{8}{l}{\textit{Continued from previous page}}\\
+\toprule
+Variable & Obs & ACF(1) & Q(12) p & Trend & Seasonal & Seasonal? & Status \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r}{\textit{Continued on next page}}\\
+\endfoot
+\bottomrule
+\multicolumn{8}{p{0.94\textwidth}}{\footnotesize STL seasonality is flagged when seasonal strength exceeds 0.3, which is the threshold implemented in the codebase. Q(12) reports the Ljung-Box p-value at lag 12. The appendix seasonal-adjustment robustness uses train-period month-of-year factors for the seasonal BoP variables.}\\
+\endlastfoot
+Broad money (M2, LKR) & 217 & 0.979 & 0.0000 & 0.997 & 0.089 & No & Excluded \\
+Broad money (M2, USD) & 217 & 0.987 & 0.0000 & 0.990 & 0.112 & No & Main text \\
+CSE net flows & 166 & 0.305 & 0.0000 & 0.308 & 0.071 & No & Appendix only \\
+Current-account proxy & 252 & 0.660 & 0.0000 & 0.594 & 0.284 & No & Excluded \\
+Exports & 224 & 0.752 & 0.0000 & 0.790 & 0.455 & Yes & Main text \\
+FX reserves & 146 & 0.944 & 0.0000 & 0.895 & 0.091 & No & Excluded \\
+Gold holdings & 146 & 0.981 & 0.0000 & 0.955 & 0.022 & No & Excluded \\
+Gross reserves & 252 & 0.971 & 0.0000 & 0.934 & 0.000 & No & Target \\
+IMF reserve position & 146 & 0.974 & 0.0000 & 0.966 & 0.005 & No & Excluded \\
+Import cover & 252 & 0.971 & 0.0000 & 0.934 & 0.000 & No & Excluded \\
+Imports & 225 & 0.829 & 0.0000 & 0.824 & 0.301 & Yes & Main text \\
+Net usable reserves & 252 & 0.978 & 0.0000 & 0.934 & 0.000 & No & Excluded \\
+Portfolio liabilities & 157 & 0.972 & 0.0000 & 0.922 & 0.097 & No & Appendix only \\
+Remittances & 202 & 0.851 & 0.0000 & 0.790 & 0.171 & No & Main text \\
+Reserve change & 251 & -0.301 & 0.0000 & 0.016 & 0.156 & No & Excluded \\
+Reserve change (\%) & 251 & -0.278 & 0.0000 & 0.028 & 0.135 & No & Excluded \\
+Reserve money (M0) & 217 & 0.975 & 0.0000 & 0.992 & 0.000 & No & Excluded \\
+SDRs & 146 & 0.798 & 0.0000 & 0.036 & 0.052 & No & Excluded \\
+Short-term debt (LKR) & 241 & 0.987 & 0.0000 & 0.968 & 0.038 & No & Appendix only \\
+Tourism earnings & 192 & 0.897 & 0.0000 & 0.875 & 0.593 & Yes & Main text \\
+Trade balance & 224 & 0.681 & 0.0000 & 0.700 & 0.384 & Yes & Main text \\
+USD/LKR & 252 & 0.986 & 0.0000 & 0.956 & 0.021 & No & Main text \\
+\end{longtable}

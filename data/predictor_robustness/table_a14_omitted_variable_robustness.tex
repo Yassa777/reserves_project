@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Appendix omitted-variable horse race: RMSE ranks by BoP augmentation}
+\label{tab:omitted_variable_robustness}
+\begin{tabular}{lcccc}
+\toprule
+Model & BoP baseline & BoP + CSE flows & BoP + short-term debt & BoP + debt + portfolio liabilities \\
+\midrule
+DMA & 2 [321.7] & 2 [362.6] & 2 [350.9] & 2 [340.7] \\
+MS-VECM & 3 [323.4] & 4 [362.8] & 1 [330.6] & 1 [326.2] \\
+MS-VAR & 1 [315.2] & 1 [361.2] & 4 [360.2] & 4 [340.7] \\
+DMS & 4 [326.0] & 3 [362.8] & 3 [360.1] & 3 [340.7] \\
+XGBoost & 5 [886.1] & 5 [931.1] & 5 [1003.6] & 5 [1012.5] \\
+ARIMA & 6 [1249.9] & 6 [1238.8] & 6 [1288.4] & 6 [1191.7] \\
+Naive & 7 [1350.8] & 7 [1350.8] & 7 [1350.8] & 7 [1350.8] \\
+BVAR & 8 [1363.3] & 8 [1357.9] & 8 [1428.1] & 8 [1385.7] \\
+VECM & 9 [1556.3] & 9 [1374.8] & 9 [1547.6] & 9 [1442.6] \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Notes: Cells report test-period rank with common-dates RMSE in brackets for the one-step-ahead forecast. The added appendix predictors are cse\_net\_usd\_m, total short-term debt converted to USD (total\_short\_term\_debt\_lkr\_m / usd\_lkr), and portfolio liabilities converted to USD millions (portfolio\_liabilities\_usd\_b $\times$ 1000). BoP baseline: n=27, window=2023:01--2025:03; BoP + CSE flows: n=27, window=2023:01--2025:03; BoP + short-term debt: n=27, window=2023:01--2025:03; BoP + debt + portfolio liabilities: n=27, window=2023:01--2025:03
+\end{tablenotes}
+\end{table}

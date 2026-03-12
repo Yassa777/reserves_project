@@ -8,6 +8,7 @@ Commands:
     diagnostics    Run time-series diagnostics (stationarity, breaks, cointegration)
     prep           Prepare forecasting datasets for all models
     evaluate       Run rolling-origin model evaluation
+    predictor-robustness  Generate predictor-screening and omitted-variable appendix artifacts
     regimes        Run MS-VAR regime characterization diagnostics
     irf            Run regime-conditional MS-VAR impulse responses
     info-loss      Run formal aggregation information-loss tests
@@ -25,6 +26,7 @@ Examples:
     slreserves regimes --varset bop --fit-split train_valid
     slreserves irf --varset bop --max-horizon 24
     slreserves info-loss --aggregated-varset parsimonious --disaggregated-varset bop
+    slreserves predictor-robustness --include-dma
     slreserves mechanisms --run-id my_run
     slreserves disentangle --varsets parsimonious,bop --models MS-VAR,XGBoost
     slreserves scenarios --scenarios combined_adverse,combined_upside
@@ -176,6 +178,10 @@ def cmd_tune(args: argparse.Namespace) -> int:
         sys.argv.append(f"--varset={args.varset}")
     if args.model:
         sys.argv.append(f"--model={args.model}")
+    if getattr(args, "n_splits", None) is not None:
+        sys.argv.append(f"--n-splits={args.n_splits}")
+    if getattr(args, "seed", None) is not None:
+        sys.argv.append(f"--seed={args.seed}")
     main()
     return 0
 
@@ -201,13 +207,56 @@ def cmd_disentangle(args: argparse.Namespace) -> int:
         sys.argv.append(f"--min-obs={args.min_obs}")
     if args.bootstrap_reps is not None:
         sys.argv.append(f"--bootstrap-reps={args.bootstrap_reps}")
+    if getattr(args, "block_length", None) is not None:
+        sys.argv.append(f"--block-length={args.block_length}")
+    if getattr(args, "ci_level", None) is not None:
+        sys.argv.append(f"--ci-level={args.ci_level}")
     if args.random_seed is not None:
         sys.argv.append(f"--random-seed={args.random_seed}")
+    if getattr(args, "headline_model", None):
+        sys.argv.append(f"--headline-model={args.headline_model}")
+    if getattr(args, "benchmark_model", None):
+        sys.argv.append(f"--benchmark-model={args.benchmark_model}")
+    if getattr(args, "headline_varsets", None):
+        sys.argv.append(f"--headline-varsets={args.headline_varsets}")
     if args.skip_dm:
         sys.argv.append("--skip-dm")
     if args.run_id:
         sys.argv.append(f"--run-id={args.run_id}")
     if args.output_root:
+        sys.argv.append(f"--output-root={args.output_root}")
+    main()
+    return 0
+
+
+def cmd_predictor_robustness(args: argparse.Namespace) -> int:
+    """Run predictor-screening and omitted-variable appendix analysis."""
+    from reserves_project.pipelines.run_predictor_robustness_appendix import main
+
+    sys.argv = ["reserves-predictor-robustness"]
+    if getattr(args, "output_dir", None):
+        sys.argv.append(f"--output-dir={args.output_dir}")
+    if getattr(args, "refit_interval", None) is not None:
+        sys.argv.append(f"--refit-interval={args.refit_interval}")
+    if getattr(args, "include_dma", False):
+        sys.argv.append("--include-dma")
+    if getattr(args, "exclude_bvar", False):
+        sys.argv.append("--exclude-bvar")
+    if getattr(args, "exclude_xgb", False):
+        sys.argv.append("--exclude-xgb")
+    if getattr(args, "dma_alpha", None) is not None:
+        sys.argv.append(f"--dma-alpha={args.dma_alpha}")
+    if getattr(args, "dma_warmup_periods", None) is not None:
+        sys.argv.append(f"--dma-warmup-periods={args.dma_warmup_periods}")
+    if getattr(args, "dma_variance_window", None) is not None:
+        sys.argv.append(f"--dma-variance-window={args.dma_variance_window}")
+    if getattr(args, "dma_min_model_obs", None) is not None:
+        sys.argv.append(f"--dma-min-model-obs={args.dma_min_model_obs}")
+    if getattr(args, "model_pool", None):
+        sys.argv.append(f"--model-pool={args.model_pool}")
+    if getattr(args, "run_id", None):
+        sys.argv.append(f"--run-id={args.run_id}")
+    if getattr(args, "output_root", None):
         sys.argv.append(f"--output-root={args.output_root}")
     main()
     return 0
@@ -544,6 +593,7 @@ def main():
         epilog="""
 Examples:
   slreserves evaluate --include-ms --varsets parsimonious
+  slreserves predictor-robustness --include-dma
   slreserves regimes --varset bop --fit-split train_valid
   slreserves irf --varset bop --max-horizon 24
   slreserves info-loss --aggregated-varset parsimonious --disaggregated-varset bop
@@ -597,6 +647,25 @@ Examples:
     p_eval.add_argument("--run-id", default=None)
     p_eval.add_argument("--output-root", default=None)
     p_eval.set_defaults(func=cmd_evaluate)
+
+    # predictor robustness appendix
+    p_pred = subparsers.add_parser(
+        "predictor-robustness",
+        help="Generate predictor-screening and omitted-variable appendix artifacts",
+    )
+    p_pred.add_argument("--output-dir", default="data/predictor_robustness")
+    p_pred.add_argument("--refit-interval", type=int, default=12)
+    p_pred.add_argument("--include-dma", action="store_true")
+    p_pred.add_argument("--exclude-bvar", action="store_true")
+    p_pred.add_argument("--exclude-xgb", action="store_true")
+    p_pred.add_argument("--dma-alpha", type=float, default=0.99)
+    p_pred.add_argument("--dma-warmup-periods", type=int, default=12)
+    p_pred.add_argument("--dma-variance-window", type=int, default=24)
+    p_pred.add_argument("--dma-min-model-obs", type=int, default=24)
+    p_pred.add_argument("--model-pool", default="Naive,ARIMA,VECM,BVAR,XGBoost,MS-VAR,MS-VECM")
+    p_pred.add_argument("--run-id", default=None)
+    p_pred.add_argument("--output-root", default=None)
+    p_pred.set_defaults(func=cmd_predictor_robustness)
 
     # regimes
     p_reg = subparsers.add_parser("regimes", help="Run MS-VAR regime characterization")
@@ -668,7 +737,12 @@ Examples:
     p_dis.add_argument("--output-dir", default="data/disentangling")
     p_dis.add_argument("--min-obs", type=int, default=12)
     p_dis.add_argument("--bootstrap-reps", type=int, default=1000)
+    p_dis.add_argument("--block-length", type=int, default=None)
+    p_dis.add_argument("--ci-level", type=float, default=0.95)
     p_dis.add_argument("--random-seed", type=int, default=42)
+    p_dis.add_argument("--headline-model", default=None)
+    p_dis.add_argument("--benchmark-model", default="Naive")
+    p_dis.add_argument("--headline-varsets", default=None)
     p_dis.add_argument("--skip-dm", action="store_true")
     p_dis.add_argument("--run-id", default=None)
     p_dis.add_argument("--output-root", default=None)
@@ -704,6 +778,8 @@ Examples:
     p_tune = subparsers.add_parser("tune", help="Tune ML model hyperparameters")
     p_tune.add_argument("--varset", default="parsimonious")
     p_tune.add_argument("--model", choices=["xgb", "lstm", "all"], default="all")
+    p_tune.add_argument("--n-splits", type=int, default=3)
+    p_tune.add_argument("--seed", type=int, default=42)
     p_tune.set_defaults(func=cmd_tune)
 
     # dashboard

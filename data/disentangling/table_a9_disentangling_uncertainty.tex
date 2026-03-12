@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Uncertainty Around the Architecture-vs-Information Decomposition}
+\label{tab:disentangling_uncertainty}
+\begin{tabular}{lccc}
+\toprule
+Contrast & Estimate & 95\% CI & Excludes 0 \\
+\midrule
+Architecture average & 477.8 & [319.5, 582.1] & Yes \\
+Architecture at Parsimonious & 384.8 & [241.0, 467.1] & Yes \\
+Architecture at BoP & 570.9 & [335.5, 729.7] & Yes \\
+Information average & 78.1 & [17.9, 111.8] & Yes \\
+Information at MS-VAR & -14.9 & [-43.6, 20.5] & No \\
+Information at XGBoost & 171.2 & [35.2, 262.2] & Yes \\
+Interaction (DiD) & 186.1 & [23.0, 300.8] & Yes \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item \textit{Notes:} Positive architecture effects mean XGBoost has higher RMSE than MS-VAR, so larger values favour the regime-switching architecture. Positive information effects mean the BoP specification raises RMSE relative to the parsimonious specification under the paper's sign convention. Confidence intervals use a stationary block bootstrap over rolling-origin dates (2023:01--2025:03; $n=27$, 10 replications, block length 3).
+\end{tablenotes}
+\end{table}

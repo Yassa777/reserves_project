@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-03-12T06:02:40.672835Z",
+  "python": "3.11.8",
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "git_commit": "2c3e94e8e5376a82f67851df18f9f7e498590aba",
+  "config_hash": "44afb39dd3896a3b5cb3ad560f48a346f2b8876499efe65dad608f30d2011fdf",
+  "config": {
+    "output_dir": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness",
+    "include_dma": true,
+    "exclude_bvar": false,
+    "exclude_xgb": false,
+    "model_pool": [
+      "Naive",
+      "ARIMA",
+      "VECM",
+      "BVAR",
+      "XGBoost",
+      "MS-VAR",
+      "MS-VECM"
+    ],
+    "refit_interval": 12,
+    "dma_alpha": 0.99,
+    "dma_warmup_periods": 12,
+    "dma_variance_window": 24,
+    "dma_min_model_obs": 24,
+    "evaluation_specs": [
+      "bop",
+      "bop_cse",
+      "bop_debt",
+      "bop_debt_portfolio",
+      "parsimonious",
+      "parsimonious_stl_adjusted",
+      "bop_stl_adjusted"
+    ]
+  },
+  "argv": [
+    "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/reserves_project/pipelines/run_predictor_robustness_appendix.py",
+    "--include-dma"
+  ],
+  "extra": {
+    "tables": {
+      "screening_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a11_predictor_screening.tex",
+      "stationarity_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a12_stationarity_outputs.tex",
+      "temporal_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a13_seasonality_outputs.tex",
+      "omitted_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a14_omitted_variable_robustness.tex",
+      "transform_tex": "/Users/dim/Desktop/Spill Projects/SL-FSI/reserves_project/data/predictor_robustness/table_a15_transformation_robustness.tex"
+    }
+  }
+}

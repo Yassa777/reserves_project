@@ -1,0 +1,5 @@
+Model,Varset,learning_rate,max_depth,n_estimators,subsample,epochs,hidden_units,dropout,early_stopping,mean_cv_rmse
+XGBoost,parsimonious,0.1,3.0,200.0,0.8,,,,none,665.0194587287615
+XGBoost,bop,0.1,4.0,300.0,1.0,,,,none,894.7051798457574
+LSTM,parsimonious,0.001,,,,60.0,16.0,0.2,"val_loss, patience=10",907.4871038901814
+LSTM,bop,0.001,,,,60.0,32.0,0.3,"val_loss, patience=10",810.9622183582178

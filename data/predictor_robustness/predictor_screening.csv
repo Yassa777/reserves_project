@@ -1,0 +1,27 @@
+variable,Variable,Source,First,Last,Obs,Coverage,Screening_Status,Included_In,Reason,is_usable,quality_status
+gross_reserves_usd_m,Gross reserves,Gross Reserves (Compiled),2005:01,2025:12,252,100.0,Target,"Parsimonious (target), BoP (target), Monetary (target), PCA (target), Full (target)",Dependent variable in every specification.,True,ok
+import_cover_months,Import cover,Gross Reserves (Compiled),2005:01,2025:12,252,100.0,Excluded,--,"Reserve-adequacy ratio, not a forecasting regressor.",True,ok
+fx_reserves_usd_m,FX reserves,Reserve Assets (CBSL Official),2013:11,2025:12,146,57.9,Excluded,--,Reserve subcomponent with short 2013+ coverage and mechanical overlap with the target.,True,ok
+imf_position_usd_m,IMF reserve position,Reserve Assets (CBSL Official),2013:11,2025:12,146,57.9,Excluded,--,Reserve subcomponent with short coverage and mechanical overlap with the target.,True,ok
+sdrs_usd_m,SDRs,Reserve Assets (CBSL Official),2013:11,2025:12,146,57.9,Excluded,--,Reserve subcomponent with short coverage and mechanical overlap with the target.,True,ok
+gold_usd_m,Gold holdings,Reserve Assets (CBSL Official),2013:11,2025:12,146,57.9,Excluded,--,Reserve subcomponent dominated by valuation effects and short 2013+ coverage.,True,ok
+exports_usd_m,Exports,Merchandise Exports,2007:01,2025:11,224,88.9,Main text,"BoP, PCA, Full","Core gross-flow inflow; retained in BoP, PCA, and Full sets.",True,ok
+imports_usd_m,Imports,Merchandise Imports,2007:01,2025:11,225,89.3,Main text,"BoP, PCA, Full","Core gross-flow outflow; retained in BoP, PCA, and Full sets.",True,ok
+tourism_usd_m,Tourism earnings,Tourism Earnings,2009:01,2024:12,192,76.2,Main text,"BoP, PCA, Full",Sri Lanka-specific external revenue channel; retained in BoP and Full sets.,True,ok
+remittances_usd_m,Remittances,Workers' Remittances,2009:01,2025:10,202,80.2,Main text,"BoP, PCA, Full","Stable FX inflow; retained in BoP, PCA, and Full sets.",True,ok
+cse_net_usd_m,CSE net flows,CSE Portfolio Flows,2012:01,2025:11,166,65.9,Appendix only,Appendix robustness: BoP + CSE,Monthly capital-flow proxy used in omitted-variable robustness; excluded from the main horse race to preserve the longer baseline window.,True,ok
+m0_lkr_m,Reserve money (M0),"Monetary Aggregates (M0, M2)",2005:01,2025:03,217,86.1,Excluded,--,Reserve money alternative considered but M2 aligns more directly with the reserve-adequacy literature.,True,ok
+m2_lkr_m,"Broad money (M2, LKR)","Monetary Aggregates (M0, M2)",2005:01,2025:03,217,86.1,Excluded,--,Converted to USD and represented by m2_usd_m in the main specifications.,True,ok
+usd_lkr,USD/LKR,Exchange Rate (USD/LKR),2005:01,2025:12,252,100.0,Main text,"Parsimonious, Monetary, PCA, Full","Exchange-rate intervention channel; retained in Parsimonious, Monetary, and Full sets.",True,ok
+inflation_yoy_pct,Inflation (YoY),NCPI Inflation,2019:01,2024:11,71,28.2,Excluded,--,"Only 71 usable observations in the merged panel, too short for the baseline horse race.",True,ok
+govt_short_term_usd_m,Govt short-term debt (USD),External Debt (USD),--,--,0,0.0,Excluded,--,All missing in the merged monthly panel.,False,all_missing
+total_short_term_usd_m,Total short-term debt (USD),External Debt (USD),--,--,0,0.0,Excluded,--,All missing in the merged monthly panel.,False,all_missing
+portfolio_liabilities_usd_b,Portfolio liabilities,Int'l Investment Position,2012:12,2025:12,157,62.3,Appendix only,Appendix robustness: BoP + debt + portfolio,Liability proxy from the IIP used in the omitted-variable appendix; shorter 2012+ coverage keeps it out of the main text sets.,True,ok
+total_short_term_debt_lkr_m,Short-term debt (LKR),Central Government Debt,2005:12,2025:12,241,95.6,Appendix only,Appendix robustness: BoP + debt,Debt-pressure proxy used in omitted-variable robustness after USD conversion; shorter coverage keeps it out of the main text sets.,True,ok
+trade_balance_usd_m,Trade balance,Derived: exports minus imports,2007:01,2025:11,224,88.9,Main text,"Parsimonious, PCA, Full",Aggregate current-account proxy retained in Parsimonious and Full sets.,True,ok
+ca_proxy_usd_m,Current-account proxy,Derived: exports + remittances + tourism - imports,2005:01,2025:12,252,100.0,Excluded,--,Linear combination of BoP components already tested separately; excluded to avoid double counting.,True,ok
+net_usable_reserves_usd_m,Net usable reserves,Derived: gross reserves less PBOC swap,2005:01,2025:12,252,100.0,Excluded,--,"Alternative reserve target, not an explanatory predictor.",True,ok
+gg_ratio,Guidotti-Greenspan ratio,Derived: gross reserves / short-term debt,--,--,0,0.0,Excluded,--,Unavailable because the USD short-term debt denominator is missing in the merged panel.,False,all_missing
+m2_usd_m,"Broad money (M2, USD)",Derived: M2 in LKR / USDLKR,2005:01,2025:03,217,86.1,Main text,"Monetary, PCA, Full","Monetary/liquidity proxy retained in Monetary, PCA, and Full sets.",True,ok
+reserve_change_usd_m,Reserve change,Derived: first difference of gross reserves,2005:02,2025:12,251,99.6,Excluded,--,"Transformation of the dependent variable used for diagnostics and state equations, not as a standalone predictor.",True,ok
+reserve_change_pct,Reserve change (%),Derived: pct change of gross reserves,2005:02,2025:12,251,99.6,Excluded,--,Target transformation only.,True,ok

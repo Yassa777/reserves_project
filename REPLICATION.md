@@ -306,8 +306,35 @@ reserves-unified --include-ms --varsets parsimonious
 # Statistical tests
 reserves-stat-tests --use-unified --unified-varset parsimonious --unified-horizon 1
 
+# Disentangling + uncertainty for headline findings
+reserves-disentangling --varsets parsimonious,bop --models MS-VAR,XGBoost --bootstrap-reps 1000 --random-seed 42
+# Generated artifacts:
+# data/disentangling/disentangling_effects.csv
+# data/disentangling/headline_rmse_reductions.csv
+# data/disentangling/table_did_rmse.tex
+# data/disentangling/table_a9_disentangling_uncertainty.tex
+# data/disentangling/table_a10_headline_rmse_uncertainty.tex
+
 # ML hyperparameter tuning
-reserves-tune-ml --varset parsimonious --model xgb
+reserves-tune-ml --varset parsimonious --model all --seed 42
+# Generated artifacts:
+# data/model_verification/ml_tuning/*_tuning_summary_*.json
+# data/model_verification/ml_tuning/*_cv_results_*.csv
+# data/model_verification/ml_tuning/table_a7_ml_tuning_design.tex
+# data/model_verification/ml_tuning/table_a8_ml_tuning_selected.tex
+
+# Predictor screening, omitted-variable, and seasonal-transformation appendix
+reserves-predictor-robustness --include-dma
+# Generated artifacts:
+# data/predictor_robustness/predictor_screening.csv
+# data/predictor_robustness/candidate_stationarity_summary.csv
+# data/predictor_robustness/candidate_temporal_summary.csv
+# data/predictor_robustness/horse_race_summary_all.csv
+# data/predictor_robustness/table_a11_predictor_screening.tex
+# data/predictor_robustness/table_a12_stationarity_outputs.tex
+# data/predictor_robustness/table_a13_seasonality_outputs.tex
+# data/predictor_robustness/table_a14_omitted_variable_robustness.tex
+# data/predictor_robustness/table_a15_transformation_robustness.tex
 
 # Scenario analysis
 reserves-scenarios --varset parsimonious --scenarios combined_adverse,combined_upside

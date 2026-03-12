@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 from itertools import product
+from math import ceil
 from pathlib import Path
-from typing import Dict, Iterable, Sequence
+from typing import Dict, Sequence
 
 import numpy as np
 import pandas as pd
 
 from reserves_project.eval.diebold_mariano import dm_test_hln
+
+DEFAULT_BOOTSTRAP_METHOD = "stationary_block"
+DEFAULT_CI_LEVEL = 0.95
 
 
 def load_unified_forecasts_for_disentangling(
@@ -48,6 +52,62 @@ def load_unified_forecasts_for_disentangling(
     return out
 
 
+def _ordered_model_varset_index(models: Sequence[str], varsets: Sequence[str]) -> pd.MultiIndex:
+    """Return a deterministic model/varset column order."""
+    return pd.MultiIndex.from_tuples(
+        [(model, varset) for model in models for varset in varsets],
+        names=["model", "varset"],
+    )
+
+
+def _validate_common_actuals(actual_panel: pd.DataFrame, tol: float = 1e-8) -> None:
+    """Ensure aligned cells share the same realized value on each date."""
+    if actual_panel.empty:
+        return
+
+    spread = actual_panel.max(axis=1) - actual_panel.min(axis=1)
+    bad_dates = spread[spread > tol]
+    if not bad_dates.empty:
+        first_bad = bad_dates.index[0]
+        raise ValueError(
+            "Aligned actuals differ across cells on "
+            f"{pd.Timestamp(first_bad).date()}: max spread {bad_dates.iloc[0]:.6f}"
+        )
+
+
+def _resolve_block_length(n_obs: int, block_length: int | None = None) -> int:
+    """Resolve stationary-bootstrap block length using the MCS rule of thumb."""
+    if n_obs <= 0:
+        return 0
+    if block_length is None:
+        return max(1, int(ceil(n_obs ** (1 / 3))))
+    return max(1, min(int(block_length), int(n_obs)))
+
+
+def _stationary_bootstrap_indices(
+    n_obs: int,
+    rng: np.random.Generator,
+    block_length: int,
+) -> np.ndarray:
+    """Draw stationary-bootstrap indices with circular wraparound."""
+    if n_obs <= 0:
+        return np.array([], dtype=int)
+    if n_obs == 1:
+        return np.array([0], dtype=int)
+
+    p_new_block = 1.0 / float(block_length)
+    indices = np.empty(n_obs, dtype=int)
+    indices[0] = int(rng.integers(0, n_obs))
+
+    for t in range(1, n_obs):
+        if rng.random() < p_new_block:
+            indices[t] = int(rng.integers(0, n_obs))
+        else:
+            indices[t] = (indices[t - 1] + 1) % n_obs
+
+    return indices
+
+
 def build_2x2_aligned_panel(
     forecasts_long: pd.DataFrame,
     models: Sequence[str],
@@ -77,27 +137,50 @@ def build_2x2_aligned_panel(
     if missing_cells:
         raise ValueError(f"Missing required model/varset cells: {sorted(missing_cells)}")
 
-    actual = (
-        df.groupby("forecast_date", as_index=True)["actual"]
-        .mean()
-        .rename("actual")
+    actual_pivot = df.pivot_table(
+        index="forecast_date",
+        columns=["model", "varset"],
+        values="actual",
+        aggfunc="mean",
     )
-
-    pivot = df.pivot_table(
+    forecast_pivot = df.pivot_table(
         index="forecast_date",
         columns=["model", "varset"],
         values="forecast",
         aggfunc="mean",
     )
 
-    required_cols_multi = pd.MultiIndex.from_tuples(list(required_cells), names=["model", "varset"])
-    missing_multi = required_cols_multi.difference(pivot.columns)
-    if len(missing_multi):
-        raise ValueError(f"Missing required model/varset forecast columns: {missing_multi.tolist()}")
+    required_cols_multi = _ordered_model_varset_index(models=models, varsets=varsets)
+    missing_actual = required_cols_multi.difference(actual_pivot.columns)
+    if len(missing_actual):
+        raise ValueError(f"Missing required model/varset actual columns: {missing_actual.tolist()}")
+    missing_forecast = required_cols_multi.difference(forecast_pivot.columns)
+    if len(missing_forecast):
+        raise ValueError(f"Missing required model/varset forecast columns: {missing_forecast.tolist()}")
 
-    pivot = pivot[required_cols_multi]
-    merged = pd.concat([actual, pivot], axis=1).dropna()
-    merged = merged.sort_index()
+    actual_pivot = actual_pivot[required_cols_multi]
+    forecast_pivot = forecast_pivot[required_cols_multi]
+
+    common_panel = pd.concat(
+        {
+            "actual": actual_pivot,
+            "forecast": forecast_pivot,
+        },
+        axis=1,
+    ).dropna()
+    common_panel = common_panel.sort_index()
+
+    actual_complete = common_panel["actual"]
+    forecast_complete = common_panel["forecast"]
+    _validate_common_actuals(actual_complete)
+
+    merged = pd.concat(
+        [
+            actual_complete.iloc[:, 0].rename("actual"),
+            forecast_complete,
+        ],
+        axis=1,
+    )
 
     # Flatten multi-index columns for downstream use.
     flat_cols = ["actual"]
@@ -107,6 +190,69 @@ def build_2x2_aligned_panel(
 
     out = merged.reset_index().rename(columns={"index": "forecast_date"})
     return out
+
+
+def build_pairwise_aligned_panel(
+    forecasts_long: pd.DataFrame,
+    models: Sequence[str],
+) -> pd.DataFrame:
+    """Build a date-aligned panel with common support for a model pair."""
+    if len(models) != 2:
+        raise ValueError("Pairwise alignment requires exactly 2 models.")
+    if forecasts_long.empty:
+        return pd.DataFrame(columns=["forecast_date", "actual"])
+
+    required_cols = {"forecast_date", "model", "actual", "forecast"}
+    missing = required_cols.difference(forecasts_long.columns)
+    if missing:
+        raise KeyError(f"Missing required columns for pairwise panel: {sorted(missing)}")
+
+    df = forecasts_long.copy()
+    df["forecast_date"] = pd.to_datetime(df["forecast_date"])
+
+    required_models = set(models)
+    present_models = set(df["model"])
+    missing_models = required_models.difference(present_models)
+    if missing_models:
+        raise ValueError(f"Missing required models: {sorted(missing_models)}")
+
+    actual_pivot = df.pivot_table(
+        index="forecast_date",
+        columns="model",
+        values="actual",
+        aggfunc="mean",
+    )
+    forecast_pivot = df.pivot_table(
+        index="forecast_date",
+        columns="model",
+        values="forecast",
+        aggfunc="mean",
+    )
+    actual_pivot = actual_pivot[models]
+    forecast_pivot = forecast_pivot[models]
+
+    common_panel = pd.concat(
+        {
+            "actual": actual_pivot,
+            "forecast": forecast_pivot,
+        },
+        axis=1,
+    ).dropna()
+    common_panel = common_panel.sort_index()
+
+    actual_complete = common_panel["actual"]
+    forecast_complete = common_panel["forecast"]
+    _validate_common_actuals(actual_complete)
+
+    merged = pd.concat(
+        [
+            actual_complete.iloc[:, 0].rename("actual"),
+            forecast_complete,
+        ],
+        axis=1,
+    )
+    merged.columns = ["actual"] + [f"forecast__{model}" for model in models]
+    return merged.reset_index().rename(columns={"index": "forecast_date"})
 
 
 def _rmse(actual: np.ndarray, forecast: np.ndarray) -> float:
@@ -209,26 +355,84 @@ def compute_two_by_two_effects(
     return pd.DataFrame(rows)
 
 
+def compute_relative_rmse_reduction(
+    aligned_panel: pd.DataFrame,
+    headline_model: str,
+    benchmark_model: str,
+) -> Dict[str, float]:
+    """Compute RMSE levels and relative reduction for a pairwise comparison."""
+    if aligned_panel.empty:
+        raise ValueError("Cannot compute RMSE reduction on an empty panel.")
+
+    actual = aligned_panel["actual"].to_numpy(dtype=float)
+    rmse_model = _rmse(actual, aligned_panel[f"forecast__{headline_model}"].to_numpy(dtype=float))
+    rmse_benchmark = _rmse(actual, aligned_panel[f"forecast__{benchmark_model}"].to_numpy(dtype=float))
+    rmse_gain = float(rmse_benchmark - rmse_model)
+    rmse_ratio = float(rmse_model / rmse_benchmark) if rmse_benchmark else np.nan
+    pct_reduction = float(100.0 * (1.0 - rmse_ratio)) if np.isfinite(rmse_ratio) else np.nan
+
+    return {
+        "headline_model": headline_model,
+        "benchmark_model": benchmark_model,
+        "n_obs": int(len(aligned_panel)),
+        "rmse_model": rmse_model,
+        "rmse_benchmark": rmse_benchmark,
+        "rmse_gain": rmse_gain,
+        "rmse_ratio": rmse_ratio,
+        "pct_reduction": pct_reduction,
+    }
+
+
 def bootstrap_two_by_two_effects(
     aligned_panel: pd.DataFrame,
     models: Sequence[str],
     varsets: Sequence[str],
     n_bootstrap: int = 1000,
+    block_length: int | None = None,
     seed: int = 42,
-    ci: float = 0.95,
+    ci: float = DEFAULT_CI_LEVEL,
 ) -> pd.DataFrame:
-    """Bootstrap confidence intervals for disentangling effects."""
+    """Stationary block-bootstrap confidence intervals for disentangling effects."""
     if n_bootstrap <= 0:
-        return pd.DataFrame(columns=["effect", "ci_lower", "ci_upper", "boot_std", "n_bootstrap"])
+        return pd.DataFrame(
+            columns=[
+                "effect",
+                "ci_lower",
+                "ci_upper",
+                "boot_std",
+                "n_bootstrap",
+                "block_length",
+                "ci_level",
+                "bootstrap_method",
+                "ci_excludes_zero",
+            ]
+        )
     if aligned_panel.empty:
-        return pd.DataFrame(columns=["effect", "ci_lower", "ci_upper", "boot_std", "n_bootstrap"])
+        return pd.DataFrame(
+            columns=[
+                "effect",
+                "ci_lower",
+                "ci_upper",
+                "boot_std",
+                "n_bootstrap",
+                "block_length",
+                "ci_level",
+                "bootstrap_method",
+                "ci_excludes_zero",
+            ]
+        )
 
     rng = np.random.default_rng(seed)
     n = len(aligned_panel)
+    resolved_block_length = _resolve_block_length(n_obs=n, block_length=block_length)
     effect_draws: Dict[str, list[float]] = {}
 
     for _ in range(n_bootstrap):
-        sample_idx = rng.integers(0, n, size=n)
+        sample_idx = _stationary_bootstrap_indices(
+            n_obs=n,
+            rng=rng,
+            block_length=resolved_block_length,
+        )
         sample = aligned_panel.iloc[sample_idx].reset_index(drop=True)
         rmse = compute_rmse_matrix(sample, models=models, varsets=varsets)
         eff = compute_two_by_two_effects(rmse, models=models, varsets=varsets)
@@ -246,9 +450,81 @@ def bootstrap_two_by_two_effects(
                 "ci_upper": float(np.quantile(values, 1 - alpha / 2)),
                 "boot_std": float(np.std(values, ddof=1)) if len(values) > 1 else np.nan,
                 "n_bootstrap": int(n_bootstrap),
+                "block_length": int(resolved_block_length),
+                "ci_level": float(ci),
+                "bootstrap_method": DEFAULT_BOOTSTRAP_METHOD,
+                "ci_excludes_zero": bool(
+                    (float(np.quantile(values, alpha / 2)) > 0.0)
+                    or (float(np.quantile(values, 1 - alpha / 2)) < 0.0)
+                ),
             }
         )
     return pd.DataFrame(rows)
+
+
+def bootstrap_relative_rmse_reduction(
+    aligned_panel: pd.DataFrame,
+    headline_model: str,
+    benchmark_model: str,
+    n_bootstrap: int = 1000,
+    block_length: int | None = None,
+    seed: int = 42,
+    ci: float = DEFAULT_CI_LEVEL,
+) -> Dict[str, float]:
+    """Stationary block-bootstrap confidence intervals for RMSE reduction claims."""
+    if aligned_panel.empty:
+        return {}
+    if n_bootstrap <= 0:
+        return {}
+
+    rng = np.random.default_rng(seed)
+    n = len(aligned_panel)
+    resolved_block_length = _resolve_block_length(n_obs=n, block_length=block_length)
+
+    metric_draws: Dict[str, list[float]] = {
+        "rmse_model": [],
+        "rmse_benchmark": [],
+        "rmse_gain": [],
+        "rmse_ratio": [],
+        "pct_reduction": [],
+    }
+
+    for _ in range(n_bootstrap):
+        sample_idx = _stationary_bootstrap_indices(
+            n_obs=n,
+            rng=rng,
+            block_length=resolved_block_length,
+        )
+        sample = aligned_panel.iloc[sample_idx].reset_index(drop=True)
+        metrics = compute_relative_rmse_reduction(
+            aligned_panel=sample,
+            headline_model=headline_model,
+            benchmark_model=benchmark_model,
+        )
+        for metric, value in metrics.items():
+            if metric in metric_draws:
+                metric_draws[metric].append(float(value))
+
+    alpha = 1.0 - ci
+    out: Dict[str, float] = {
+        "n_bootstrap": int(n_bootstrap),
+        "block_length": int(resolved_block_length),
+        "ci_level": float(ci),
+        "bootstrap_method": DEFAULT_BOOTSTRAP_METHOD,
+    }
+    for metric, draws in metric_draws.items():
+        values = np.asarray(draws, dtype=float)
+        out[f"{metric}_ci_lower"] = float(np.quantile(values, alpha / 2))
+        out[f"{metric}_ci_upper"] = float(np.quantile(values, 1 - alpha / 2))
+        out[f"{metric}_boot_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else np.nan
+
+    out["rmse_gain_ci_excludes_zero"] = bool(
+        (out["rmse_gain_ci_lower"] > 0.0) or (out["rmse_gain_ci_upper"] < 0.0)
+    )
+    out["pct_reduction_ci_excludes_zero"] = bool(
+        (out["pct_reduction_ci_lower"] > 0.0) or (out["pct_reduction_ci_upper"] < 0.0)
+    )
+    return out
 
 
 def run_disentangling_dm_tests(

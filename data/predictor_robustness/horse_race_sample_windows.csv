@@ -1,0 +1,8 @@
+spec_key,spec_label,family,spec_note,n_model_vars,effective_start,effective_end,train_obs,validation_obs,test_obs,models_run
+bop,BoP baseline,omitted_variable,Baseline balance-of-payments specification.,5,2009:01,2025:03,132,36,27,"ARIMA, BVAR, DMA, DMS, MS-VAR, MS-VECM, Naive, VECM, XGBoost"
+bop_cse,BoP + CSE flows,omitted_variable,Adds the CSE portfolio-flow proxy available in the merged monthly panel.,6,2012:01,2025:03,96,36,27,"ARIMA, BVAR, DMA, DMS, MS-VAR, MS-VECM, Naive, VECM, XGBoost"
+bop_debt,BoP + short-term debt,omitted_variable,Adds short-term debt converted from LKR using the monthly USD/LKR rate.,6,2009:01,2025:03,132,36,27,"ARIMA, BVAR, DMA, DMS, MS-VAR, MS-VECM, Naive, VECM, XGBoost"
+bop_debt_portfolio,BoP + debt + portfolio liabilities,omitted_variable,Adds both the converted short-term debt proxy and portfolio liabilities from the IIP.,7,2012:12,2025:03,85,36,27,"ARIMA, BVAR, DMA, DMS, MS-VAR, MS-VECM, Naive, VECM, XGBoost"
+parsimonious,Parsimonious baseline,transformation,Baseline parsimonious specification.,3,2007:01,2025:12,156,36,36,"ARIMA, BVAR, DMA, DMS, MS-VAR, MS-VECM, Naive, VECM, XGBoost"
+parsimonious_stl_adjusted,Parsimonious + STL-adjusted trade balance,transformation,Uses a train-period STL month-of-year adjustment for the trade balance.,3,2007:01,2025:12,156,36,36,"ARIMA, BVAR, DMA, DMS, MS-VAR, MS-VECM, Naive, VECM, XGBoost"
+bop_stl_adjusted,BoP + STL-adjusted seasonal flows,transformation,"Uses train-period STL month-of-year adjustments for exports, imports, and tourism.",5,2009:01,2025:03,132,36,27,"ARIMA, BVAR, DMA, DMS, MS-VAR, MS-VECM, Naive, VECM, XGBoost"
